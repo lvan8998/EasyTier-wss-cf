@@ -1,4 +1,4 @@
-import { isProbablyWebSocketUrl, normalizeWebSocketUrl, randomToken } from "./auth.js";
+import { randomToken } from "./auth.js";
 
 export const STATE_KEY = "state";
 
@@ -30,20 +30,10 @@ function ensureRouteStats(route) {
 export function normalizeRouteInput(input, existing = null) {
   const route = existing ?? {};
   const now = new Date().toISOString();
-  const upstreamWsUrl = normalizeText(input.upstreamWsUrl ?? route.upstreamWsUrl);
-
-  if (!upstreamWsUrl) {
-    throw new Error("upstreamWsUrl is required");
-  }
-
-  if (!isProbablyWebSocketUrl(upstreamWsUrl)) {
-    throw new Error("upstreamWsUrl must use ws, wss, http, or https");
-  }
 
   return {
     id: normalizeText(input.id ?? route.id ?? crypto.randomUUID()),
     name: normalizeText(input.name ?? route.name ?? "Unnamed route") || "Unnamed route",
-    upstreamWsUrl,
     networkName: normalizeText(input.networkName ?? route.networkName),
     networkSecret: normalizeText(input.networkSecret ?? route.networkSecret),
     clientToken: normalizeText(input.clientToken ?? route.clientToken ?? randomToken(24)),

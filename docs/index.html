@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>EasyTier WSS CF · Cloudflare Workers 方案</title>
+  <meta
+    name="description"
+    content="EasyTier WSS CF 是一个完全独立部署在 Cloudflare Workers 上的 EasyTier WSS 支持项目，带管理后台、路由管理和详细部署说明。"
+  />
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --bg-soft: rgba(255, 255, 255, 0.7);
+      --card: rgba(255, 255, 255, 0.82);
+      --card-strong: rgba(255, 255, 255, 0.96);
+      --text: #101828;
+      --muted: #5f6b7a;
+      --line: rgba(16, 24, 40, 0.09);
+      --line-strong: rgba(16, 24, 40, 0.14);
+      --blue: #2563eb;
+      --blue-2: #6d7dff;
+      --blue-3: #9ed0ff;
+      --green: #0f9d58;
+      --shadow: 0 30px 80px rgba(15, 23, 42, 0.08);
+      --shadow-soft: 0 18px 50px rgba(15, 23, 42, 0.08);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --max: 1180px;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(157, 208, 255, 0.35), transparent 24%),
+        radial-gradient(circle at 90% 20%, rgba(109, 125, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 45% 85%, rgba(37, 99, 235, 0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .shell {
+      position: relative;
+      overflow: clip;
+    }
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(20px);
+      background: rgba(245, 247, 251, 0.72);
+      border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+    }
+
+    .topbar-inner {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,.95), rgba(255,255,255,.35)),
+        linear-gradient(145deg, #3b82f6, #8b5cf6);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 12px 24px rgba(37, 99, 235, 0.18);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 18px;
+    }
+
+    nav {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    nav a { padding: 8px 10px; border-radius: 999px; transition: background .2s var(--ease), color .2s var(--ease); }
+    nav a:hover { background: rgba(255,255,255,.75); color: var(--text); }
+
+    .nav-cta {
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: linear-gradient(145deg, var(--text), #1f2937);
+      color: white;
+      font-size: 14px;
+      box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
+    }
+
+    .hero {
+      padding: 96px 0 44px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .headline {
+      font-size: clamp(44px, 7vw, 80px);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      margin: 0;
+      max-width: 11ch;
+    }
+
+    .lede {
+      margin: 22px 0 0;
+      font-size: clamp(18px, 2vw, 22px);
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 40rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s var(--ease);
+    }
+
+    .button:hover { transform: translateY(-1px); }
+
+    .button.primary {
+      color: white;
+      background: linear-gradient(145deg, var(--blue), #1d4ed8);
+      box-shadow: 0 18px 40px rgba(37, 99, 235, 0.25);
+    }
+
+    .button.secondary {
+      background: rgba(255,255,255,.75);
+      border-color: rgba(16, 24, 40, 0.08);
+      color: var(--text);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-card {
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(160deg, rgba(255,255,255,.94), rgba(255,255,255,.76)),
+        linear-gradient(145deg, rgba(37, 99, 235, 0.12), rgba(109, 125, 255, 0.08));
+      border: 1px solid rgba(16, 24, 40, 0.08);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .hero-card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 22px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      background: rgba(15, 157, 88, 0.08);
+      border: 1px solid rgba(15, 157, 88, 0.16);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 0 6px rgba(15, 157, 88, 0.12);
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.68);
+      border: 1px solid rgba(16, 24, 40, 0.06);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      margin-bottom: 8px;
+    }
+
+    .metric span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    .mini-code {
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #0f172a, #111827);
+      color: #e5eefc;
+      font-family: "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      overflow: auto;
+    }
+
+    .section {
+      padding: 52px 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: clamp(28px, 3vw, 40px);
+      line-height: 1.06;
+      letter-spacing: -0.05em;
+    }
+
+    .section-copy {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 58ch;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.08);
+      color: #1d4ed8;
+      border: 1px solid rgba(37, 99, 235, 0.12);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    .card h3 {
+      margin: 16px 0 10px;
+      font-size: 20px;
+      letter-spacing: -0.04em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(37, 99, 235, 0.14), rgba(109, 125, 255, 0.08));
+      color: #1d4ed8;
+      border: 1px solid rgba(37, 99, 235, 0.12);
+    }
+
+    .icon svg { width: 22px; height: 22px; }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .step {
+      position: relative;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,.78);
+      border: 1px solid var(--line);
+      min-height: 190px;
+      overflow: hidden;
+    }
+
+    .step::after {
+      content: attr(data-step);
+      position: absolute;
+      right: 16px;
+      bottom: 14px;
+      font-size: 54px;
+      line-height: 1;
+      color: rgba(37, 99, 235, 0.08);
+      font-weight: 800;
+      letter-spacing: -0.08em;
+    }
+
+    .step h3 { margin: 12px 0 8px; font-size: 18px; letter-spacing: -0.03em; }
+    .step p { margin: 0; color: var(--muted); line-height: 1.7; position: relative; z-index: 1; }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 24px;
+      border-radius: var(--radius-xl);
+      background: var(--card-strong);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .codeblock {
+      margin: 16px 0 0;
+      padding: 20px;
+      border-radius: 22px;
+      background: #0f172a;
+      color: #dbeafe;
+      font-family: "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow: auto;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(16, 24, 40, 0.06);
+    }
+
+    .check {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      flex: none;
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
+      margin-top: 1px;
+    }
+
+    .faq {
+      display: grid;
+      gap: 12px;
+    }
+
+    details {
+      background: rgba(255,255,255,.8);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    details p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .footer {
+      padding: 44px 0 64px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(16, 24, 40, 0.08);
+      padding-top: 20px;
+    }
+
+    .subtle-link {
+      color: #1d4ed8;
+      font-weight: 600;
+    }
+
+    .highlight {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .dock {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(16, 24, 40, 0.08);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .fade-in {
+      animation: rise .7s var(--ease) both;
+    }
+
+    .delay-1 { animation-delay: .08s; }
+    .delay-2 { animation-delay: .16s; }
+    .delay-3 { animation-delay: .24s; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid, .split, .timeline, .cards { grid-template-columns: 1fr; }
+      .section-head { flex-direction: column; align-items: start; }
+      nav { display: none; }
+      .hero { padding-top: 56px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="wrap topbar-inner">
+        <div class="brand">
+          <div class="logo">E</div>
+          <div>
+            <div>EasyTier WSS CF</div>
+            <div style="font-size:12px;color:var(--muted);font-weight:500;">Cloudflare Workers · MIT</div>
+          </div>
+        </div>
+        <nav>
+          <a href="#features">特性</a>
+          <a href="#architecture">架构</a>
+          <a href="#deploy">部署</a>
+          <a href="#panel">后台</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <a class="nav-cta" href="https://github.com/Kaiyuan/EasyTier-wss-cf" target="_blank" rel="noreferrer">GitHub 仓库</a>
+      </div>
+    </div>
+
+    <main>
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <div class="dock fade-in">完全独立部署在 Cloudflare Workers 上</div>
+            <h1 class="headline fade-in delay-1">为 EasyTier 打造的 WSS 边缘入口</h1>
+            <p class="lede fade-in delay-2">
+              EasyTier WSS CF 是一个面向 Cloudflare Workers 的独立实现，提供 EasyTier 的 WSS 接入、
+              管理后台、路由配置和基础统计，适合直接通过 GitHub Fork + Cloudflare 网页完成部署。
+            </p>
+            <div class="actions fade-in delay-3">
+              <a class="button primary" href="#deploy">查看部署说明
+                <span aria-hidden="true">→</span>
+              </a>
+              <a class="button secondary" href="#architecture">了解工作原理</a>
+            </div>
+          </div>
+
+          <aside class="hero-card fade-in delay-1">
+            <div class="hero-card-top">
+              <div>
+                <div style="font-size:14px;color:var(--muted);margin-bottom:8px;">项目状态</div>
+                <div style="font-size:28px;font-weight:700;letter-spacing:-0.05em;">可直接部署</div>
+              </div>
+              <div class="status">Workers Ready</div>
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric">
+                <strong>WSS</strong>
+                <span>直接提供 EasyTier 的 `wss://` 入口</span>
+              </div>
+              <div class="metric">
+                <strong>Panel</strong>
+                <span>内置管理后台，路径为 `/panel`</span>
+              </div>
+              <div class="metric">
+                <strong>DO</strong>
+                <span>使用 Durable Objects 做路由协调</span>
+              </div>
+              <div class="metric">
+                <strong>MIT</strong>
+                <span>项目以 MIT 许可证发布</span>
+              </div>
+            </div>
+
+            <div class="mini-code">
+sudo easytier-core -d \
+  --network-name &lt;name&gt; \
+  --network-secret &lt;secret&gt; \
+  -p 'wss://your-domain/ws/&lt;route-id&gt;/&lt;client-token&gt;'
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">核心能力</h2>
+              <p class="section-copy">这不是一个中转代理，而是一个直接部署在 Cloudflare Workers 上的 EasyTier WSS 支持项目。</p>
+            </div>
+            <span class="pill">Apple 风格 · 清爽 · 轻量</span>
+          </div>
+
+          <div class="cards">
+            <article class="card">
+              <div class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 17V7h10v10H7Z" />
+                  <path d="M10 10h4M10 14h3" />
+                </svg>
+              </div>
+              <h3>管理后台</h3>
+              <p>提供 `/panel` 页面，可直接创建、编辑、删除路由，并生成可复制的 EasyTier 命令。</p>
+            </article>
+            <article class="card">
+              <div class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 12h6l2-4 4 8 2-4h2" />
+                  <path d="M5 19h14" />
+                </svg>
+              </div>
+              <h3>路由协调</h3>
+              <p>使用 `RouteHub` Durable Object 处理同一路由内的连接协调，保障 WSS 入口可稳定工作。</p>
+            </article>
+            <article class="card">
+              <div class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3v18" />
+                  <path d="M5 8h14M7 16h10" />
+                </svg>
+              </div>
+              <h3>部署简单</h3>
+              <p>先在 GitHub fork，再到 Cloudflare Workers 网页连接仓库即可部署，不要求本地操作。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="architecture">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">架构说明</h2>
+              <p class="section-copy">项目由 Worker、管理存储和路由 Hub 三部分构成，职责清晰，适合直接在边缘运行。</p>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="panel">
+              <div class="pill">数据与控制面</div>
+              <h3 style="margin:16px 0 10px;font-size:24px;letter-spacing:-0.04em;">管理存储与后台登录</h3>
+              <p style="margin:0;color:var(--muted);line-height:1.8;">
+                `AdminStore` 保存路由配置、统计信息和事件记录；后台登录密码通过 Cloudflare Workers Secret
+                设置，推荐变量名为 `ADMIN_PASSWORD`。
+              </p>
+              <div class="codeblock">
+POST /api/login
+{ "password": "你的 ADMIN_PASSWORD" }
+
+GET /api/state
+返回路由列表、统计和事件
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="pill">连接与消息面</div>
+              <h3 style="margin:16px 0 10px;font-size:24px;letter-spacing:-0.04em;">WSS 接入与 peer 协调</h3>
+              <p style="margin:0;color:var(--muted);line-height:1.8;">
+                每条路由使用 `/ws/:routeId/:clientToken` 作为入口。Workers 会解析 EasyTier 的 peer 头信息，
+                并在同一路由的连接之间进行消息转发与协调。
+              </p>
+              <div class="codeblock">
+wss://your-domain/ws/route-id/client-token
+
+由 RouteHub 负责该路由的连接管理
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="deploy">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">部署说明</h2>
+              <p class="section-copy">推荐的发布方式是 GitHub Fork + Cloudflare Workers 网页部署。整个过程可以完全不依赖本地命令行。</p>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <article class="step" data-step="01">
+              <div class="pill">Fork 仓库</div>
+              <h3>先把项目复制到你的 GitHub 账号</h3>
+              <p>打开仓库页面，点击 Fork。后续 Cloudflare 会直接连接你 fork 出来的仓库。</p>
+            </article>
+            <article class="step" data-step="02">
+              <div class="pill">Cloudflare</div>
+              <h3>在 Workers 网页上导入仓库并创建项目</h3>
+              <p>进入 Cloudflare Dashboard 的 Workers 创建页面，选择从 GitHub 导入项目，然后授权并部署。</p>
+            </article>
+            <article class="step" data-step="03">
+              <div class="pill">Secret</div>
+              <h3>设置后台密码变量</h3>
+              <p>在 Worker 的 Secrets / Variables 中添加 `ADMIN_PASSWORD`，这就是管理后台的登录密码。</p>
+            </article>
+            <article class="step" data-step="04">
+              <div class="pill">完成</div>
+              <h3>访问 `/panel` 并创建路由</h3>
+              <p>部署完成后，打开 `/panel`，登录后即可配置路由并生成 EasyTier 的 WSS 连接命令。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="panel">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">后台与使用方式</h2>
+              <p class="section-copy">后台不仅能管理路由，也能帮你直接生成客户端使用命令，减少配置出错的概率。</p>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="panel">
+              <div class="pill">后台能力</div>
+              <ul class="list" style="margin-top:16px;">
+                <li><span class="check">✓</span><span><span class="highlight">路由管理</span>：创建、编辑、删除、启用或禁用单条路由。</span></li>
+                <li><span class="check">✓</span><span><span class="highlight">命令生成</span>：直接输出 EasyTier 客户端可用命令。</span></li>
+                <li><span class="check">✓</span><span><span class="highlight">状态查看</span>：查看连接数、累计连接和最近事件。</span></li>
+              </ul>
+            </div>
+
+            <div class="panel">
+              <div class="pill">示例命令</div>
+              <div class="codeblock">
+sudo easytier-core -d \
+  --network-name my-network \
+  --network-secret my-secret \
+  -p 'wss://your-domain/ws/route-id/client-token'
+
+后台生成的命令可以直接复制使用
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="faq">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">常见问题</h2>
+              <p class="section-copy">把一些最常见的部署与定位问题放在这里，方便快速确认。</p>
+            </div>
+          </div>
+
+          <div class="faq">
+            <details>
+              <summary>这个项目是代理别人的 WSS 服务吗？</summary>
+              <p>不是。它本身就是一个直接运行在 Cloudflare Workers 上的 EasyTier WSS 支持实现。</p>
+            </details>
+            <details>
+              <summary>后台密码应该怎么设置？</summary>
+              <p>通过 Cloudflare Workers 的 Secrets / Variables 设置 <span class="highlight">ADMIN_PASSWORD</span>。代码也兼容旧变量 <span class="highlight">ADMIN_SECRET</span>，但推荐统一使用前者。</p>
+            </details>
+            <details>
+              <summary>为什么推荐 GitHub Fork + Cloudflare 网页部署？</summary>
+              <p>这样最适合这个项目的发布方式：仓库里保持完整源码，部署时由 Cloudflare 直接读取 GitHub 仓库，不要求你在本地执行部署命令。</p>
+            </details>
+            <details>
+              <summary>GitHub Pages 这个介绍页怎么启用？</summary>
+              <p>在仓库的 Settings → Pages 中，将发布源设置为 <span class="highlight">Deploy from a branch</span>，分支选 <span class="highlight">main</span>，目录选 <span class="highlight">/docs</span>。保存后，GitHub Pages 就会从这个目录发布本介绍页。</p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-row">
+        <div>© 2026 EasyTier WSS CF · <a class="subtle-link" href="https://github.com/Kaiyuan/EasyTier-wss-cf/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a></div>
+        <div>
+          <a class="subtle-link" href="https://github.com/Kaiyuan/EasyTier-wss-cf" target="_blank" rel="noreferrer">GitHub 仓库</a>
+          <span style="margin:0 10px;">·</span>
+          <a class="subtle-link" href="https://github.com/Kaiyuan/EasyTier-wss-cf/blob/main/README.md" target="_blank" rel="noreferrer">项目说明</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

@@ -6,9 +6,13 @@ compatibility_date = "2026-05-29"
 name = "ADMIN_STORE"
 class_name = "AdminStore"
 
+[[durable_objects.bindings]]
+name = "ROUTE_HUB"
+class_name = "RouteHub"
+
 [[migrations]]
 tag = "v1"
-new_sqlite_classes = ["AdminStore"]
+new_sqlite_classes = ["AdminStore", "RouteHub"]
 
 [vars]
 APP_NAME = "EasyTier WSS CF"

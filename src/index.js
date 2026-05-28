@@ -9,8 +9,9 @@ import {
   toRouteViews,
   updateRoute,
 } from "./store.js";
-import { isWebSocketUpgrade, parseRelayPath, proxyRelayWebSocket, testUpstreamWebSocket } from "./relay.js";
+import { parseRelayPath } from "./relay.js";
 import { renderAdminPage } from "./ui.js";
+import { RouteHub } from "./route-hub.js";
 
 function json(data, init = {}) {
   return new Response(JSON.stringify(data, null, 2), {
@@ -39,7 +40,7 @@ function apiError(message, status = 400) {
 }
 
 function adminSecret(env) {
-  return env.ADMIN_SECRET || "development-secret";
+  return env.ADMIN_PASSWORD || env.ADMIN_SECRET || "development-secret";
 }
 
 async function requireAdmin(request, env) {
@@ -60,8 +61,11 @@ async function readJsonBody(request) {
 }
 
 function adminStoreStub(env) {
-  const id = env.ADMIN_STORE.idFromName("main");
-  return env.ADMIN_STORE.get(id);
+  return env.ADMIN_STORE.get(env.ADMIN_STORE.idFromName("main"));
+}
+
+function routeHubStub(env, routeId) {
+  return env.ROUTE_HUB.get(env.ROUTE_HUB.idFromName(routeId));
 }
 
 async function adminFetch(env, path, options = {}) {
@@ -81,13 +85,6 @@ async function adminFetch(env, path, options = {}) {
 async function loadAdminState(env) {
   const response = await adminFetch(env, "/state");
   return await response.json();
-}
-
-async function storeEvent(env, event) {
-  return await adminFetch(env, "/events", {
-    method: "POST",
-    body: JSON.stringify(event),
-  });
 }
 
 function withRouteView(route, origin) {
@@ -183,9 +180,6 @@ async function handleUpdateRoute(request, env, routeId) {
       return apiError(payload?.error || "Failed to update route", response.status || 400);
     }
     const updated = await response.json();
-    if (!updated) {
-      return apiError("Route not found", 404);
-    }
     const origin = new URL(request.url).origin;
     return json(withRouteView(updated, origin));
   } catch (error) {
@@ -227,7 +221,7 @@ async function handleGetRoute(request, env, routeId) {
   return json(withRouteView(route, origin));
 }
 
-async function handleTestRoute(request, env, routeId) {
+async function handleValidateRoute(request, env, routeId) {
   const auth = await requireAdmin(request, env);
   if (!auth) {
     return apiError("Unauthorized", 401);
@@ -238,18 +232,18 @@ async function handleTestRoute(request, env, routeId) {
     const payload = await response.json().catch(() => null);
     return apiError(payload?.error || "Route not found", response.status || 404);
   }
-  const route = await response.json();
 
-  try {
-    const ok = await testUpstreamWebSocket(route);
-    return json({ ok, routeId });
-  } catch (error) {
-    return apiError(error instanceof Error ? error.message : String(error), 502);
-  }
+  const route = await response.json();
+  const origin = new URL(request.url).origin;
+  return json({
+    ok: true,
+    mode: "standalone-workers",
+    route: withRouteView(route, origin),
+  });
 }
 
-async function handleRelay(request, env, ctx) {
-  if (!isWebSocketUpgrade(request)) {
+async function handleRelay(request, env) {
+  if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") {
     return apiError("Expected Upgrade: websocket", 426);
   }
 
@@ -258,44 +252,10 @@ async function handleRelay(request, env, ctx) {
     return apiError("Invalid relay path", 404);
   }
 
-  const state = await loadAdminState(env);
-  const route = state.routes.find((item) => item.id === parsed.routeId);
-  if (!route) {
-    return apiError("Route not found", 404);
-  }
-
-  if (!route.enabled) {
-    return apiError("Route disabled", 403);
-  }
-
-  if (route.clientToken !== parsed.clientToken) {
-    return apiError("Route not found", 404);
-  }
-
-  const eventSink = (event) => {
-    ctx.waitUntil(storeEvent(env, event));
-  };
-
-  try {
-    return await proxyRelayWebSocket(request, route, {
-      onEvent: eventSink,
-    });
-  } catch (error) {
-    ctx.waitUntil(
-      storeEvent(env, {
-        type: "error",
-        routeId: route.id,
-        routeName: route.name,
-        message: error instanceof Error ? error.message : String(error),
-        at: new Date().toISOString(),
-        deltaActive: 0,
-      }),
-    );
-    return apiError(error instanceof Error ? error.message : String(error), 502);
-  }
+  return await routeHubStub(env, parsed.routeId).fetch(request);
 }
 
-async function routeRequest(request, env, ctx) {
+async function routeRequest(request, env) {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
@@ -347,12 +307,12 @@ async function routeRequest(request, env, ctx) {
     }
 
     if (segments.length === 4 && segments[3] === "test" && request.method === "POST") {
-      return await handleTestRoute(request, env, routeId);
+      return await handleValidateRoute(request, env, routeId);
     }
   }
 
   if (url.pathname.startsWith("/ws/")) {
-    return await handleRelay(request, env, ctx);
+    return await handleRelay(request, env);
   }
 
   return text("Not found", { status: 404 });
@@ -361,19 +321,20 @@ async function routeRequest(request, env, ctx) {
 export class AdminStore extends DurableObject {
   async fetch(request) {
     const url = new URL(request.url);
-    const state = await loadState(this.ctx.storage);
 
     if (request.method === "GET" && url.pathname === "/state") {
+      const state = await loadState(this.ctx.storage);
       return json(state);
     }
 
     if (request.method === "GET" && url.pathname === "/routes") {
+      const state = await loadState(this.ctx.storage);
       return json({ routes: state.routes });
     }
 
     if (request.method === "GET" && url.pathname.startsWith("/routes/")) {
       const routeId = url.pathname.split("/").filter(Boolean)[1];
-      const route = state.routes.find((item) => item.id === routeId);
+      const route = await getRoute(this.ctx.storage, routeId);
       if (!route) {
         return apiError("Route not found", 404);
       }
@@ -433,7 +394,6 @@ export class AdminStore extends DurableObject {
         connectionId: String(body.connectionId || crypto.randomUUID()),
         clientIp: String(body.clientIp || ""),
         userAgent: String(body.userAgent || ""),
-        upstreamWsUrl: String(body.upstreamWsUrl || ""),
         code: body.code,
         reason: String(body.reason || ""),
         wasClean: Boolean(body.wasClean),
@@ -449,8 +409,10 @@ export class AdminStore extends DurableObject {
   }
 }
 
+export { RouteHub } from "./route-hub.js";
+
 export default {
-  async fetch(request, env, ctx) {
-    return await routeRequest(request, env, ctx);
+  async fetch(request, env) {
+    return await routeRequest(request, env);
   },
 };
