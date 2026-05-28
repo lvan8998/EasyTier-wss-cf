@@ -1,3 +1,4 @@
+import { DurableObject } from "cloudflare:workers";
 import { decodePeerManagerHeader, parseRelayPath, peerKey, shouldBroadcastPeerMessage } from "./relay.js";
 
 function json(data, init = {}) {
