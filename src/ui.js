@@ -656,7 +656,22 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
         activeTotal: "active {active} / total {total}",
         confirmDeleteRoute: "Delete this route?",
         confirmRevokeKey: "Revoke this API key?",
-        publicApiHint: "Paste a key and verify it before calling the public API."
+        publicApiHint: "Paste a key and verify it before calling the public API.",
+        controlCenter: "Control Center",
+        mobileOverview: "Overview",
+        mobileRoutes: "Routes",
+        mobileApiKeys: "API Keys",
+        mobilePublicApi: "Public API",
+        mobileEvents: "Events",
+        publicUrl: "Public URL",
+        easyTierLabel: "EasyTier",
+        eventOpen: "OPEN",
+        eventClose: "CLOSE",
+        eventError: "ERROR",
+        adminPasswordPrompt: "ADMIN_PASSWORD",
+        notesPlaceholder: "Optional notes",
+        apiKeyNamePlaceholder: "mobile app",
+        currentKeyPlaceholder: "Paste the generated key here"
       },
       "zh-Hans": {
         name: "简体中文",
@@ -743,7 +758,22 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
         activeTotal: "当前 {active} / 累计 {total}",
         confirmDeleteRoute: "确定删除这条路由吗？",
         confirmRevokeKey: "确定撤销这个 API key 吗？",
-        publicApiHint: "先粘贴一个 key 并验证，再调用对外 API。"
+        publicApiHint: "先粘贴一个 key 并验证，再调用对外 API。",
+        controlCenter: "控制中心",
+        mobileOverview: "概览",
+        mobileRoutes: "路由",
+        mobileApiKeys: "API 密钥",
+        mobilePublicApi: "公开 API",
+        mobileEvents: "事件",
+        publicUrl: "公开地址",
+        easyTierLabel: "EasyTier",
+        eventOpen: "打开",
+        eventClose: "关闭",
+        eventError: "错误",
+        adminPasswordPrompt: "ADMIN_PASSWORD",
+        notesPlaceholder: "可选备注",
+        apiKeyNamePlaceholder: "移动端应用",
+        currentKeyPlaceholder: "在此粘贴生成的 key"
       },
       "zh-Hant": {
         name: "繁體中文",
@@ -830,7 +860,22 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
         activeTotal: "目前 {active} / 累計 {total}",
         confirmDeleteRoute: "確定刪除這條路由嗎？",
         confirmRevokeKey: "確定撤銷這個 API key 嗎？",
-        publicApiHint: "先貼上一個 key 並驗證，再呼叫對外 API。"
+        publicApiHint: "先貼上一個 key 並驗證，再呼叫對外 API。",
+        controlCenter: "控制中心",
+        mobileOverview: "總覽",
+        mobileRoutes: "路由",
+        mobileApiKeys: "API 金鑰",
+        mobilePublicApi: "公開 API",
+        mobileEvents: "事件",
+        publicUrl: "公開網址",
+        easyTierLabel: "EasyTier",
+        eventOpen: "開啟",
+        eventClose: "關閉",
+        eventError: "錯誤",
+        adminPasswordPrompt: "ADMIN_PASSWORD",
+        notesPlaceholder: "可選備註",
+        apiKeyNamePlaceholder: "行動裝置應用",
+        currentKeyPlaceholder: "在此貼上產生的 key"
       },
       ja: {
         name: "日本語",
@@ -917,7 +962,22 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
         activeTotal: "現在 {active} / 合計 {total}",
         confirmDeleteRoute: "このルートを削除しますか？",
         confirmRevokeKey: "この API key を取り消しますか？",
-        publicApiHint: "key を貼り付けて検証してから公開 API を呼び出してください。"
+        publicApiHint: "key を貼り付けて検証してから公開 API を呼び出してください。",
+        controlCenter: "コントロールセンター",
+        mobileOverview: "概要",
+        mobileRoutes: "ルート",
+        mobileApiKeys: "API キー",
+        mobilePublicApi: "公開 API",
+        mobileEvents: "イベント",
+        publicUrl: "公開 URL",
+        easyTierLabel: "EasyTier",
+        eventOpen: "OPEN",
+        eventClose: "CLOSE",
+        eventError: "ERROR",
+        adminPasswordPrompt: "ADMIN_PASSWORD",
+        notesPlaceholder: "任意のメモ",
+        apiKeyNamePlaceholder: "モバイルアプリ",
+        currentKeyPlaceholder: "生成された key をここに貼り付けてください"
       },
       ko: {
         name: "한국어",
@@ -1004,7 +1064,22 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
         activeTotal: "현재 {active} / 누적 {total}",
         confirmDeleteRoute: "이 라우트를 삭제할까요?",
         confirmRevokeKey: "이 API key를 폐기할까요?",
-        publicApiHint: "key를 붙여넣고 검증한 뒤 공개 API를 호출하세요."
+        publicApiHint: "key를 붙여넣고 검증한 뒤 공개 API를 호출하세요.",
+        controlCenter: "컨트롤 센터",
+        mobileOverview: "개요",
+        mobileRoutes: "라우트",
+        mobileApiKeys: "API 키",
+        mobilePublicApi: "공개 API",
+        mobileEvents: "이벤트",
+        publicUrl: "공개 URL",
+        easyTierLabel: "EasyTier",
+        eventOpen: "열림",
+        eventClose: "닫힘",
+        eventError: "오류",
+        adminPasswordPrompt: "ADMIN_PASSWORD",
+        notesPlaceholder: "선택 메모",
+        apiKeyNamePlaceholder: "모바일 앱",
+        currentKeyPlaceholder: "생성된 key를 여기에 붙여 넣으세요"
       }
     };
 
@@ -1141,8 +1216,12 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
       el("publicApiHeaderLabel").textContent = t("header");
       el("publicApiResultLabel").textContent = t("verificationResult");
       el("routeForm").querySelector("#routeEnabled").innerHTML = '<option value="true">' + t("enabled") + '</option><option value="false">' + t("disabled") + '</option>';
-      el("sidebarTitle").textContent = t("overview");
+      el("sidebarTitle").textContent = t("controlCenter");
       el("sidebarSub").textContent = t("routesSub2");
+      document.querySelectorAll("#tabsMobile button").forEach((button, index) => {
+        const mobileKeys = ["mobileOverview", "mobileRoutes", "mobileApiKeys", "mobilePublicApi", "mobileEvents"];
+        button.textContent = t(mobileKeys[index]);
+      });
       el("navOverview").textContent = t("overview");
       el("navOverviewSub").textContent = t("overviewSub");
       el("navRoutes").textContent = t("routes");
@@ -1170,10 +1249,10 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
       el("publicApiHint").textContent = t("publicApiHint");
       el("apiKeyOutput").textContent = t("generatedKey");
       el("apiKeyForm").querySelector("textarea").placeholder = "";
-      el("currentApiKey").placeholder = "Paste the generated key here";
-      el("routeNotes").placeholder = "Optional notes";
-      el("apiKeyNotes").placeholder = "Optional notes";
-      el("apiKeyName").placeholder = "mobile app";
+      el("currentApiKey").placeholder = t("currentKeyPlaceholder");
+      el("routeNotes").placeholder = t("notesPlaceholder");
+      el("apiKeyNotes").placeholder = t("notesPlaceholder");
+      el("apiKeyName").placeholder = t("apiKeyNamePlaceholder");
     }
 
     function setActiveNav(target) {
@@ -1204,6 +1283,13 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
       badge.className = "badge " + (route.enabled ? "good" : "bad");
       badge.textContent = route.enabled ? t("routeEnabledText") : t("routeDisabledText");
       return badge;
+    }
+
+    function eventTypeLabel(type) {
+      if (type === "open") return t("eventOpen");
+      if (type === "close") return t("eventClose");
+      if (type === "error") return t("eventError");
+      return String(type || "").toUpperCase();
     }
 
     function renderRoutes(routes) {
@@ -1251,8 +1337,8 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
         body.style.marginTop = "12px";
         body.className = "grid two";
         const fields = [
-          ["Public URL", route.publicWsUrl],
-          ["EasyTier", route.easyTierCommand],
+          [t("publicUrl"), route.publicWsUrl],
+          [t("easyTierLabel"), route.easyTierCommand],
           [t("networkName"), route.networkName],
           [t("networkSecret"), route.networkSecret],
           [t("clientToken"), route.clientToken],
@@ -1382,7 +1468,7 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
         const head = document.createElement("div");
         head.className = "event-head";
         const title = document.createElement("strong");
-        title.textContent = event.type.toUpperCase() + " · " + (event.routeName || event.routeId);
+        title.textContent = eventTypeLabel(event.type) + " · " + (event.routeName || event.routeId);
         const time = document.createElement("span");
         time.className = "muted";
         time.textContent = event.at;
@@ -1480,7 +1566,7 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
     });
 
     el("loginBtn").addEventListener("click", async () => {
-      const password = prompt("ADMIN_PASSWORD");
+      const password = prompt(t("adminPasswordPrompt"));
       if (!password) return;
       try {
         const data = await api("/api/login", {
