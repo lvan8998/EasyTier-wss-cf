@@ -352,7 +352,7 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
     }
   </style>
 </head>
-<body>
+<body class="locked">
   <div class="shell">
     <div class="topbar">
       <div class="topbar-inner">
@@ -385,7 +385,7 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
       </div>
     </section>
 
-    <div id="protectedContent" class="protected">
+    <div id="protectedContent" class="protected hidden">
       <div id="tabsMobile" class="tabs-mobile">
         <button data-target="#overviewSection">Overview</button>
         <button data-target="#routesSection">Routes</button>
@@ -1076,6 +1076,7 @@ export function renderAdminPage(appName = "EasyTier WSS CF") {
       loginPanel.classList.toggle("hidden", !locked);
       loginToggleBtn.classList.toggle("hidden", !locked);
       logoutBtn.classList.toggle("hidden", locked);
+      el("protectedContent").classList.toggle("hidden", locked);
     }
 
     function setToken(token) {
