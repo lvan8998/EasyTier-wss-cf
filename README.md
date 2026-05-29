@@ -80,6 +80,8 @@ Workers 接收到 WSS 连接后，会根据 EasyTier 的 peer 信息在同一路
 - `/api/routes`：创建路由
 - `/api/routes/:id`：读取、更新、删除路由
 - `/api/routes/:id/test`：验证路由配置
+- `/api/admin/api-keys`：生成、查看和撤销 API key
+- `/api/public/state`：使用 API key 获取公开数据
 
 ### WSS
 
@@ -134,6 +136,28 @@ MyStrongPanelPassword123
 ```
 
 如果你之前用过旧变量名，也可以继续保留 `ADMIN_SECRET`，但建议以后统一使用 `ADMIN_PASSWORD`。
+
+## API key 如何使用
+
+对外读取数据时，需要先在后台生成一个 API key，然后把这个 key 放到请求头里：
+
+```http
+X-API-Key: your-generated-key
+```
+
+验证通过后，才能访问：
+
+```text
+/api/public/state
+```
+
+后台里可以：
+
+- 生成新的 key
+- 保存当前 key 方便测试
+- 撤销已经不再使用的 key
+
+建议把公开 key 和后台密码分开管理，这样更安全，也更适合移动端或第三方程序调用。
 
 ### 第四步：打开管理后台
 

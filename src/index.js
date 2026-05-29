@@ -1,11 +1,15 @@
 import { DurableObject } from "cloudflare:workers";
 import { readAdminToken, signAdminToken, verifyAdminToken } from "./auth.js";
 import {
+  createApiKey,
   createRoute,
   deleteRoute,
   getRoute,
   loadState,
   recordEvent,
+  revokeApiKey,
+  listApiKeys,
+  verifyApiKey,
   toRouteView,
   toRouteViews,
   updateRoute,
@@ -88,6 +92,44 @@ async function loadAdminState(env) {
   return await response.json();
 }
 
+function readApiKey(request) {
+  const headerKey = request.headers.get("X-API-Key");
+  if (headerKey) {
+    return headerKey.trim();
+  }
+
+  const authorization = request.headers.get("Authorization");
+  if (authorization?.startsWith("Bearer ")) {
+    return authorization.slice(7).trim();
+  }
+
+  const url = new URL(request.url);
+  const queryKey = url.searchParams.get("api_key");
+  if (queryKey) {
+    return queryKey.trim();
+  }
+
+  return null;
+}
+
+async function requireApiKey(request, env) {
+  const apiKey = readApiKey(request);
+  if (!apiKey) {
+    return null;
+  }
+
+  const response = await adminFetch(env, "/api-keys/verify", {
+    method: "POST",
+    body: JSON.stringify({ key: apiKey }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return await response.json();
+}
+
 function withRouteView(route, origin) {
   return toRouteView(route, origin);
 }
@@ -130,6 +172,75 @@ async function handleAdminState(request, env) {
     summary: state.summary,
     events: state.events,
   });
+}
+
+async function handlePublicState(request, env) {
+  const apiKey = await requireApiKey(request, env);
+  if (!apiKey) {
+    return apiError("Invalid API key", 401);
+  }
+
+  const origin = new URL(request.url).origin;
+  const state = await loadAdminState(env);
+  return json({
+    routes: withRouteViews(state.routes, origin),
+    summary: state.summary,
+    apiKey,
+  });
+}
+
+async function handleApiKeyList(request, env) {
+  const auth = await requireAdmin(request, env);
+  if (!auth) {
+    return apiError("Unauthorized", 401);
+  }
+
+  const response = await adminFetch(env, "/api-keys");
+  if (!response.ok) {
+    return apiError("Failed to load API keys", response.status || 400);
+  }
+
+  return json(await response.json());
+}
+
+async function handleCreateApiKey(request, env) {
+  const auth = await requireAdmin(request, env);
+  if (!auth) {
+    return apiError("Unauthorized", 401);
+  }
+
+  const body = await readJsonBody(request);
+  if (!body) {
+    return apiError("Invalid JSON body");
+  }
+
+  const response = await adminFetch(env, "/api-keys", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    return apiError(payload?.error || "Failed to create API key", response.status || 400);
+  }
+
+  return json(await response.json(), { status: 201 });
+}
+
+async function handleDeleteApiKey(request, env, apiKeyId) {
+  const auth = await requireAdmin(request, env);
+  if (!auth) {
+    return apiError("Unauthorized", 401);
+  }
+
+  const response = await adminFetch(env, `/api-keys/${encodeURIComponent(apiKeyId)}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    return apiError(payload?.error || "API key not found", response.status || 404);
+  }
+
+  return new Response(null, { status: 204 });
 }
 
 async function handleCreateRoute(request, env) {
@@ -276,12 +387,32 @@ async function routeRequest(request, env) {
     });
   }
 
-  if (url.pathname === "/api/login") {
+  if (url.pathname === "/api/login" || url.pathname === "/api/admin/login") {
     return await handleLogin(request, env);
   }
 
-  if (url.pathname === "/api/state") {
+  if (url.pathname === "/api/state" || url.pathname === "/api/admin/state") {
     return await handleAdminState(request, env);
+  }
+
+  if (url.pathname === "/api/public/state") {
+    return await handlePublicState(request, env);
+  }
+
+  if (url.pathname === "/api/admin/api-keys" && request.method === "GET") {
+    return await handleApiKeyList(request, env);
+  }
+
+  if (url.pathname === "/api/admin/api-keys" && request.method === "POST") {
+    return await handleCreateApiKey(request, env);
+  }
+
+  if (url.pathname.startsWith("/api/admin/api-keys/") && request.method === "DELETE") {
+    const apiKeyId = url.pathname.split("/").filter(Boolean)[3];
+    if (!apiKeyId) {
+      return apiError("API key id is required", 400);
+    }
+    return await handleDeleteApiKey(request, env, apiKeyId);
   }
 
   if (url.pathname === "/api/routes" && request.method === "POST") {
@@ -312,6 +443,33 @@ async function routeRequest(request, env) {
     }
   }
 
+  if (url.pathname.startsWith("/api/public/routes/")) {
+    const apiKey = await requireApiKey(request, env);
+    if (!apiKey) {
+      return apiError("Invalid API key", 401);
+    }
+
+    const segments = url.pathname.split("/").filter(Boolean);
+    const routeId = segments[3];
+    if (!routeId) {
+      return apiError("Route id is required", 400);
+    }
+
+    const response = await adminFetch(env, `/routes/${encodeURIComponent(routeId)}`);
+    if (!response.ok) {
+      return apiError("Route not found", 404);
+    }
+    const route = await response.json();
+
+    if (segments.length === 4 && request.method === "GET") {
+      return json(withRouteView(route, url.origin));
+    }
+
+    if (segments.length === 5 && segments[4] === "test" && request.method === "POST") {
+      return json({ ok: true, mode: "public-api", route: withRouteView(route, url.origin) });
+    }
+  }
+
   if (url.pathname.startsWith("/ws/")) {
     return await handleRelay(request, env);
   }
@@ -331,6 +489,49 @@ export class AdminStore extends DurableObject {
     if (request.method === "GET" && url.pathname === "/routes") {
       const state = await loadState(this.ctx.storage);
       return json({ routes: state.routes });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api-keys") {
+      const keys = await listApiKeys(this.ctx.storage);
+      return json({ apiKeys: keys });
+    }
+
+    if (request.method === "POST" && url.pathname === "/api-keys") {
+      const body = await readJsonBody(request);
+      if (!body) {
+        return apiError("Invalid JSON body");
+      }
+
+      try {
+        const result = await createApiKey(this.ctx.storage, body);
+        return json(result, { status: 201 });
+      } catch (error) {
+        return apiError(error instanceof Error ? error.message : String(error));
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api-keys/verify") {
+      const body = await readJsonBody(request);
+      const key = body?.key || request.headers.get("X-API-Key") || request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+      if (!key) {
+        return apiError("API key is required", 401);
+      }
+
+      const matched = await verifyApiKey(this.ctx.storage, key);
+      if (!matched) {
+        return apiError("Invalid API key", 401);
+      }
+
+      return json({ apiKey: matched });
+    }
+
+    if (request.method === "DELETE" && url.pathname.startsWith("/api-keys/")) {
+      const apiKeyId = url.pathname.split("/").filter(Boolean)[1];
+      const revoked = await revokeApiKey(this.ctx.storage, apiKeyId);
+      if (!revoked) {
+        return apiError("API key not found", 404);
+      }
+      return json(revoked);
     }
 
     if (request.method === "GET" && url.pathname.startsWith("/routes/")) {

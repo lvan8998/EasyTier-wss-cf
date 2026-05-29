@@ -1,15 +1,18 @@
 import { randomToken } from "./auth.js";
 
 export const STATE_KEY = "state";
+const textEncoder = new TextEncoder();
 
 export function createEmptyState() {
   return {
     routes: [],
+    apiKeys: [],
     events: [],
     summary: {
       activeConnections: 0,
       totalConnections: 0,
       updatedAt: null,
+      apiKeyCount: 0,
     },
   };
 }
@@ -24,6 +27,44 @@ function ensureRouteStats(route) {
     totalConnections: Number(route?.stats?.totalConnections ?? 0),
     lastSeenAt: route?.stats?.lastSeenAt ?? null,
     lastError: route?.stats?.lastError ?? null,
+  };
+}
+
+function toHex(bytes) {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function hashApiKey(value) {
+  const digest = await crypto.subtle.digest("SHA-256", textEncoder.encode(String(value)));
+  return toHex(new Uint8Array(digest));
+}
+
+function normalizeApiKeyRecord(input, existing = null) {
+  const now = new Date().toISOString();
+  const source = existing ?? {};
+  return {
+    id: normalizeText(input.id ?? source.id ?? crypto.randomUUID()),
+    name: normalizeText(input.name ?? source.name ?? "Unnamed key") || "Unnamed key",
+    notes: normalizeText(input.notes ?? source.notes),
+    keyHash: normalizeText(input.keyHash ?? source.keyHash),
+    createdAt: input.createdAt ?? source.createdAt ?? now,
+    updatedAt: input.updatedAt ?? source.updatedAt ?? now,
+    lastUsedAt: input.lastUsedAt ?? source.lastUsedAt ?? null,
+    revokedAt: input.revokedAt ?? source.revokedAt ?? null,
+    enabled: input.enabled ?? source.enabled ?? true,
+  };
+}
+
+function stripApiKeyRecord(record) {
+  return {
+    id: record.id,
+    name: record.name,
+    notes: record.notes,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+    lastUsedAt: record.lastUsedAt,
+    revokedAt: record.revokedAt,
+    enabled: record.enabled,
   };
 }
 
@@ -55,6 +96,9 @@ export function ensureStateShape(value) {
       ...normalizeRouteInput(route, route),
       stats: ensureRouteStats(route),
     })),
+    apiKeys: Array.isArray(state.apiKeys)
+      ? state.apiKeys.map((apiKey) => normalizeApiKeyRecord(apiKey, apiKey))
+      : [],
     events: events.slice(0, 100),
     summary: {
       activeConnections:
@@ -62,6 +106,12 @@ export function ensureStateShape(value) {
       totalConnections:
         typeof state.summary?.totalConnections === "number" ? state.summary.totalConnections : 0,
       updatedAt: state.summary?.updatedAt ?? null,
+      apiKeyCount:
+        typeof state.summary?.apiKeyCount === "number"
+          ? state.summary.apiKeyCount
+          : Array.isArray(state.apiKeys)
+            ? state.apiKeys.filter((entry) => entry?.enabled !== false && !entry?.revokedAt).length
+            : 0,
     },
   };
 }
@@ -126,6 +176,7 @@ function refreshSummary(state) {
     activeConnections: totals.activeConnections,
     totalConnections: totals.totalConnections,
     updatedAt: new Date().toISOString(),
+    apiKeyCount: state.apiKeys.filter((entry) => entry.enabled !== false && !entry.revokedAt).length,
   };
 }
 
@@ -176,6 +227,61 @@ export async function deleteRoute(storage, routeId) {
   refreshSummary(state);
   await saveState(storage, state);
   return true;
+}
+
+export async function listApiKeys(storage) {
+  const state = await loadState(storage);
+  return state.apiKeys.map((apiKey) => stripApiKeyRecord(normalizeApiKeyRecord(apiKey, apiKey)));
+}
+
+export async function createApiKey(storage, input = {}) {
+  const state = await loadState(storage);
+  const plainKey = randomToken(32);
+  const keyHash = await hashApiKey(plainKey);
+  const apiKey = normalizeApiKeyRecord({ ...input, keyHash, enabled: true });
+  state.apiKeys.unshift(apiKey);
+  refreshSummary(state);
+  await saveState(storage, state);
+  return {
+    key: plainKey,
+    apiKey: stripApiKeyRecord(apiKey),
+  };
+}
+
+export async function revokeApiKey(storage, apiKeyId) {
+  const state = await loadState(storage);
+  const index = state.apiKeys.findIndex((entry) => entry.id === apiKeyId);
+  if (index < 0) {
+    return null;
+  }
+
+  const current = normalizeApiKeyRecord(state.apiKeys[index], state.apiKeys[index]);
+  current.enabled = false;
+  current.revokedAt = new Date().toISOString();
+  current.updatedAt = current.revokedAt;
+  state.apiKeys[index] = current;
+  refreshSummary(state);
+  await saveState(storage, state);
+  return stripApiKeyRecord(current);
+}
+
+export async function verifyApiKey(storage, providedKey) {
+  const state = await loadState(storage);
+  const keyHash = await hashApiKey(providedKey);
+  const index = state.apiKeys.findIndex(
+    (entry) => entry.enabled !== false && !entry.revokedAt && entry.keyHash === keyHash,
+  );
+  if (index < 0) {
+    return null;
+  }
+
+  const matched = normalizeApiKeyRecord(state.apiKeys[index], state.apiKeys[index]);
+  matched.lastUsedAt = new Date().toISOString();
+  matched.updatedAt = matched.lastUsedAt;
+  state.apiKeys[index] = matched;
+  refreshSummary(state);
+  await saveState(storage, state);
+  return stripApiKeyRecord(matched);
 }
 
 export async function recordEvent(storage, event) {
