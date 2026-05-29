@@ -1,4 +1,4 @@
-export const serveAdminDashboard = `<!DOCTYPE html>
+export const serveAdminDashboard = `\`\n<rest of file unchanged except backticks escaped...`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
