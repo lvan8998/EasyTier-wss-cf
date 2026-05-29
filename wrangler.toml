@@ -17,3 +17,7 @@ bindings = [
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["RelayRoom"]
+
+[[migrations]]
+tag = "v2"
+deleted_classes = ["AdminStore", "RouteHub"]
