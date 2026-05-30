@@ -10,7 +10,7 @@ EASYTIER_COMPRESS_RPC = "1"
 LOCATION_HINT = "apac"
 # Set ADMIN_PASSWORD as a Secret in the Cloudflare dashboard (Workers > Settings > Variables)
 # Do NOT commit your real password here.
-ADMIN_PASSWORD = "changeme"
+# ADMIN_PASSWORD is set via Cloudflare secret; do not commit actual password
 
 [durable_objects]
 bindings = [
