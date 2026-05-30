@@ -1582,13 +1582,13 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             sGradient.setAttribute('y1', '0%');
             sGradient.setAttribute('x2', '100%');
             sGradient.setAttribute('y2', '100%');
-            sGradient.innerHTML = `<stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#6366f1"/>`;
+            sGradient.innerHTML = '<stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#6366f1"/>';
             defs.appendChild(sGradient);
 
             // Peer gradient
             const pGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
             pGradient.setAttribute('id', 'peerGradient');
-            pGradient.innerHTML = `<stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#059669"/>`;
+            pGradient.innerHTML = '<stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#059669"/>';
             defs.appendChild(pGradient);
             
             svg.appendChild(defs);
@@ -1647,7 +1647,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 
                 // Mouseover details
                 const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-                title.textContent = `Peer ID: ${peer.peerId}\nHostname: ${peer.hostname || 'N/A'}\nIP: ${peer.ipv4Addr || 'N/A'}`;
+                title.textContent = 'Peer ID: ' + peer.peerId + '\nHostname: ' + (peer.hostname || 'N/A') + '\nIP: ' + (peer.ipv4Addr || 'N/A');
                 peerNode.appendChild(title);
                 svg.appendChild(peerNode);
 
@@ -1712,7 +1712,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         async function viewRoomPeers(roomId) {
             activeSelectedRoomId = roomId;
             document.getElementById('roomPeersCard').style.display = 'block';
-            document.getElementById('roomPeersTitle').innerText = `Room Peers - ${roomId}`;
+            document.getElementById('roomPeersTitle').innerText = 'Room Peers - ' + roomId;
             
             // Quick load from local cache first
             const body = document.getElementById('peersTableBody');
@@ -1850,7 +1850,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         async function deleteToken(tokenVal) {
             if (!confirm('Are you sure you want to delete this token?')) return;
             try {
-                const res = await fetch(`/api/tokens?token=${encodeURIComponent(tokenVal)}`, {
+                const res = await fetch('/api/tokens?token=' + encodeURIComponent(tokenVal), {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + token, 'X-Admin-Token': token }
                 });
