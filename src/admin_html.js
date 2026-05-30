@@ -1491,7 +1491,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 // Fetch detailed stats for each room to aggregate metrics
                 const roomPromises = globalStats.rooms.map(async (room) => {
                     try {
-                        const rRes = await fetch(`/api/rooms/${encodeURIComponent(room.roomId)}/stats`, {
+                        const rRes = await fetch('/api/rooms/' + encodeURIComponent(room.roomId) + '/stats', {
                             headers: { 'Authorization': 'Bearer ' + token, 'X-Admin-Token': token }
                         });
                         if (rRes.ok) {
