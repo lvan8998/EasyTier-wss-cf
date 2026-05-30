@@ -737,10 +737,10 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                     <i data-lucide="languages" style="width: 14px; height: 14px;"></i>
                     <select id="loginLang" class="top-lang-select" onchange="switchLanguage(this.value)">
                         <option value="en">English</option>
-                        <option value="zh-CN">简体中文</option>
+                        <option value="zh-CN">简体中�?/option>
                         <option value="zh-TW">繁體中文</option>
-                        <option value="ja">日本語</option>
-                        <option value="ko">한국어</option>
+                        <option value="ja">日本�?/option>
+                        <option value="ko">한국�?/option>
                     </select>
                     <i data-lucide="chevron-down" class="top-lang-arrow"></i>
                 </div>
@@ -749,7 +749,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="passwordInput" data-i18n="login-label">Admin Password</label>
-                    <input type="password" id="passwordInput" class="form-control" placeholder="••••••••" required>
+                    <input type="password" id="passwordInput" class="form-control" placeholder="•••••••�? required>
                 </div>
                 <button type="submit" class="btn-submit" data-i18n="login-btn">Sign In</button>
             </form>
@@ -809,10 +809,10 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                         <i data-lucide="languages" style="width: 14px; height: 14px;"></i>
                         <select id="dashboardLang" class="top-lang-select" onchange="switchLanguage(this.value)">
                             <option value="en">English</option>
-                            <option value="zh-CN">简体中文</option>
+                            <option value="zh-CN">简体中�?/option>
                             <option value="zh-TW">繁體中文</option>
-                            <option value="ja">日本語</option>
-                            <option value="ko">한국어</option>
+                            <option value="ja">日本�?/option>
+                            <option value="ko">한국�?/option>
                         </select>
                         <i data-lucide="chevron-down" class="top-lang-arrow"></i>
                     </div>
@@ -1043,212 +1043,212 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 "set-pass-env-note": "The admin password is configured via the ADMIN_PASSWORD environment variable in the Cloudflare Workers dashboard. Changes take effect after redeployment."
             },
             "zh-CN": {
-                "login-label": "管理员密码",
+                "login-label": "管理员密�?,
                 "login-btn": "登录",
-                "login-error": "密码错误，请重试。",
+                "login-error": "密码错误，请重试�?,
                 "menu-overview": "系统概览",
-                "menu-rooms": "房间与节点",
+                "menu-rooms": "房间与节�?,
                 "menu-tokens": "连接令牌",
                 "menu-settings": "配置中心",
-                "role-admin": "系统管理员",
-                "stat-status": "运行状态",
+                "role-admin": "系统管理�?,
+                "stat-status": "运行状�?,
                 "stat-online": "正常运行",
-                "stat-active-rooms": "活跃房间数",
-                "stat-connected-peers": "总在线节点",
-                "stat-total-traffic": "传输流量 (接收/发送)",
-                "topo-map-title": "网络拓扑结构图",
-                "topo-no-nodes": "暂无节点连接，中继服务器空闲中。",
+                "stat-active-rooms": "活跃房间�?,
+                "stat-connected-peers": "总在线节�?,
+                "stat-total-traffic": "传输流量 (接收/发�?",
+                "topo-map-title": "网络拓扑结构�?,
+                "topo-no-nodes": "暂无节点连接，中继服务器空闲中�?,
                 "rooms-list-title": "活跃中继房间列表",
                 "th-room-name": "房间 ID",
-                "th-peer-count": "在线节点数",
+                "th-peer-count": "在线节点�?,
                 "th-actions": "操作",
                 "btn-close": "关闭",
                 "th-peer-id": "节点 ID",
                 "th-virtual-ip": "虚拟 IP (EasyTier)",
-                "th-hostname": "主机名",
+                "th-hostname": "主机�?,
                 "th-version": "EasyTier 版本",
-                "th-rx-tx": "接收 / 发送流量",
-                "th-conn-time": "已连接时间",
-                "tokens-title": "客户端连接访问令牌 (Tokens)",
-                "btn-gen-token": "创建新令牌",
+                "th-rx-tx": "接收 / 发送流�?,
+                "th-conn-time": "已连接时�?,
+                "tokens-title": "客户端连接访问令�?(Tokens)",
+                "btn-gen-token": "创建新令�?,
                 "th-token": "令牌秘钥",
-                "th-desc": "令牌用途描述",
+                "th-desc": "令牌用途描�?,
                 "th-created": "创建时间",
                 "settings-general": "全局中继配置",
-                "set-req-token-title": "启用客户端连接令牌校验",
-                "set-req-token-desc": "强制 EasyTier 客户端在连接时必须携带合法的 token 查询参数，否则拒绝连接。",
-                "settings-admin-pass": "修改管理员登录密码",
-                "set-new-pass": "输入新密码",
+                "set-req-token-title": "启用客户端连接令牌校�?,
+                "set-req-token-desc": "强制 EasyTier 客户端在连接时必须携带合法的 token 查询参数，否则拒绝连接�?,
+                "settings-admin-pass": "修改管理员登录密�?,
+                "set-new-pass": "输入新密�?,
                 "btn-save": "保存修改",
                 "btn-cancel": "取消",
                 "btn-confirm": "生成",
                 "alert-security-title": "安全警告: ",
-                "alert-security-desc": "您当前正在使用默认密码 'admin' 登录，为了安全，请立即修改密码！",
+                "alert-security-desc": "您当前正在使用默认密�?'admin' 登录，为了安全，请立即修改密码！",
                 "action-view": "查看节点",
                 "action-kick": "踢出",
-                "action-ban": "加入黑名单",
+                "action-ban": "加入黑名�?,
                 "action-delete": "注销",
                 "msg-changed-pass": "管理员密码修改成功！",
-                "msg-gen-success": "令牌生成成功！",
+                "msg-gen-success": "令牌生成成功�?,
                 "msg-kicked-success": "节点已成功踢出！",
-                "msg-deleted-success": "令牌已成功注销！",
-                "set-pass-env-note": "管理员密码通过 Cloudflare Workers 控制台中的 ADMIN_PASSWORD 环境变量进行配置，修改后重新部署即可生效。"
+                "msg-deleted-success": "令牌已成功注销�?,
+                "set-pass-env-note": "管理员密码通过 Cloudflare Workers 控制台中�?ADMIN_PASSWORD 环境变量进行配置，修改后重新部署即可生效�?
             },
             "zh-TW": {
-                "login-label": "管理員密碼",
+                "login-label": "管理員密�?,
                 "login-btn": "登入",
-                "login-error": "密碼錯誤，請重試。",
+                "login-error": "密碼錯誤，請重試�?,
                 "menu-overview": "系統概覽",
-                "menu-rooms": "房間與節點",
-                "menu-tokens": "連線權權杖",
+                "menu-rooms": "房間與節�?,
+                "menu-tokens": "連線權權�?,
                 "menu-settings": "配置中心",
-                "role-admin": "系統管理員",
-                "stat-status": "運行狀態",
+                "role-admin": "系統管理�?,
+                "stat-status": "運行狀�?,
                 "stat-online": "正常運行",
-                "stat-active-rooms": "活躍房間數",
-                "stat-connected-peers": "總線上節點",
-                "stat-total-traffic": "傳輸流量 (接收/發送)",
-                "topo-map-title": "網路拓撲結構圖",
-                "topo-no-nodes": "暫無節點連線，中繼伺服器空閒中。",
+                "stat-active-rooms": "活躍房間�?,
+                "stat-connected-peers": "總線上節�?,
+                "stat-total-traffic": "傳輸流量 (接收/發�?",
+                "topo-map-title": "網路拓撲結構�?,
+                "topo-no-nodes": "暫無節點連線，中繼伺服器空閒中�?,
                 "rooms-list-title": "活躍中繼房間清單",
                 "th-room-name": "房間 ID",
                 "th-peer-count": "線上節點數",
                 "th-actions": "操作",
                 "btn-close": "關閉",
-                "th-peer-id": "節點 ID",
+                "th-peer-id": "節�?ID",
                 "th-virtual-ip": "虛擬 IP (EasyTier)",
-                "th-hostname": "主機名",
+                "th-hostname": "主機�?,
                 "th-version": "EasyTier 版本",
-                "th-rx-tx": "接收 / 發送流量",
+                "th-rx-tx": "接收 / 發送流�?,
                 "th-conn-time": "已連線時間",
                 "tokens-title": "用戶端連線存取權杖 (Tokens)",
-                "btn-gen-token": "創建新權杖",
+                "btn-gen-token": "創建新權�?,
                 "th-token": "權杖密鑰",
-                "th-desc": "權杖用途描述",
+                "th-desc": "權杖用途描�?,
                 "th-created": "創建時間",
                 "settings-general": "全局中繼配置",
-                "set-req-token-title": "啟用用戶端連線權權杖校驗",
-                "set-req-token-desc": "強制 EasyTier 用戶端在連線時必須攜帶合法的 token 查詢參數，否則拒絕連線。",
-                "settings-admin-pass": "修改管理員登入密碼",
-                "set-new-pass": "輸入新密碼",
+                "set-req-token-title": "啟用用戶端連線權權杖校�?,
+                "set-req-token-desc": "強制 EasyTier 用戶端在連線時必須攜帶合法的 token 查詢參數，否則拒絕連線�?,
+                "settings-admin-pass": "修改管理員登入密�?,
+                "set-new-pass": "輸入新密�?,
                 "btn-save": "儲存修改",
                 "btn-cancel": "取消",
                 "btn-confirm": "生成",
                 "alert-security-title": "安全警告: ",
-                "alert-security-desc": "您目前正在使用預設密碼 'admin' 登入，為了安全，請立即修改密碼！",
-                "action-view": "查看節點",
+                "alert-security-desc": "您目前正在使用預設密�?'admin' 登入，為了安全，請立即修改密碼！",
+                "action-view": "查看節�?,
                 "action-kick": "踢出",
-                "action-ban": "加入黑名單",
+                "action-ban": "加入黑名�?,
                 "action-delete": "註銷",
                 "msg-changed-pass": "管理員密碼修改成功！",
-                "msg-gen-success": "權杖生成成功！",
-                "msg-kicked-success": "節點已成功踢出！",
+                "msg-gen-success": "權杖生成成功�?,
+                "msg-kicked-success": "節點已成功踢出�?,
                 "msg-deleted-success": "權杖已成功註銷！",
-                "set-pass-env-note": "管理員密碼透過 Cloudflare Workers 控制台中的 ADMIN_PASSWORD 環境變數進行設定，修改後重新部署即可生效。"
+                "set-pass-env-note": "管理員密碼透過 Cloudflare Workers 控制台中�?ADMIN_PASSWORD 環境變數進行設定，修改後重新部署即可生效�?
             },
             ja: {
                 "login-label": "管理者パスワード",
                 "login-btn": "ログイン",
-                "login-error": "パスワードが正しくありません。再試行してください。",
+                "login-error": "パスワードが正しくありません。再試行してください�?,
                 "menu-overview": "システム概要",
                 "menu-rooms": "部屋とノード",
                 "menu-tokens": "接続トークン",
                 "menu-settings": "設定センター",
-                "role-admin": "システム管理者",
+                "role-admin": "システム管理�?,
                 "stat-status": "稼働状態",
-                "stat-online": "オンライン",
+                "stat-online": "オンライ�?,
                 "stat-active-rooms": "アクティブな部屋",
-                "stat-connected-peers": "接続中ノード数",
+                "stat-connected-peers": "接続中ノード�?,
                 "stat-total-traffic": "転送量 (受信/送信)",
                 "topo-map-title": "ネットワークトポロジーマップ",
-                "topo-no-nodes": "接続されているノードはありません。中継サーバーは空いています。",
-                "rooms-list-title": "アクティブな部屋の一覧",
+                "topo-no-nodes": "接続されているノードはありません。中継サーバーは空いています�?,
+                "rooms-list-title": "アクティブな部屋の一�?,
                 "th-room-name": "部屋 ID",
-                "th-peer-count": "接続数",
+                "th-peer-count": "接続�?,
                 "th-actions": "操作",
-                "btn-close": "閉じる",
-                "th-peer-id": "ノード ID",
+                "btn-close": "閉じ�?,
+                "th-peer-id": "ノー�?ID",
                 "th-virtual-ip": "仮想 IP",
                 "th-hostname": "ホスト名",
-                "th-version": "バージョン",
+                "th-version": "バージョ�?,
                 "th-rx-tx": "受信 / 送信",
                 "th-conn-time": "接続時間",
-                "tokens-title": "クライアント接続用トークン",
-                "btn-gen-token": "トークンの生成",
+                "tokens-title": "クライアント接続用トーク�?,
+                "btn-gen-token": "トークンの生�?,
                 "th-token": "トークン",
                 "th-desc": "説明",
                 "th-created": "作成日時",
-                "settings-general": "一般設定",
+                "settings-general": "一般設�?,
                 "set-req-token-title": "接続トークンの検証を強制",
-                "set-req-token-desc": "クライアントが有効な token パラメータを持って接続することを強制します。",
-                "settings-admin-pass": "管理者パスワードの変更",
+                "set-req-token-desc": "クライアントが有効な token パラメータを持って接続することを強制します�?,
+                "settings-admin-pass": "管理者パスワードの変�?,
                 "set-new-pass": "新しいパスワード",
                 "btn-save": "パスワードを保存",
-                "btn-cancel": "キャンセル",
+                "btn-cancel": "キャンセ�?,
                 "btn-confirm": "確認",
                 "alert-security-title": "セキュリティ警告: ",
-                "alert-security-desc": "デフォルトのパスワード 'admin' を使用しています。すぐに変更してください。",
+                "alert-security-desc": "デフォルトのパスワー�?'admin' を使用しています。すぐに変更してください�?,
                 "action-view": "詳細表示",
-                "action-kick": "キック",
+                "action-kick": "キッ�?,
                 "action-ban": "禁止リストへ",
                 "action-delete": "削除",
-                "msg-changed-pass": "管理者パスワードが更新されました！",
-                "msg-gen-success": "トークンが生成されました！",
+                "msg-changed-pass": "管理者パスワードが更新されました�?,
+                "msg-gen-success": "トークンが生成されました�?,
                 "msg-kicked-success": "ノードをキックしました！",
                 "msg-deleted-success": "トークンを削除しました！",
-                "set-pass-env-note": "管理者パスワードは Cloudflare Workers ダッシュボードの ADMIN_PASSWORD 環境変数で設定します。変更は再デプロイ後に有効になります。"
+                "set-pass-env-note": "管理者パスワード�?Cloudflare Workers ダッシュボード�?ADMIN_PASSWORD 環境変数で設定します。変更は再デプロイ後に有効になります�?
             },
             ko: {
                 "login-label": "관리자 비밀번호",
-                "login-btn": "로그인",
-                "login-error": "비밀번호가 잘못되었습니다. 다시 시도하십시오.",
-                "menu-overview": "시스템 개요",
-                "menu-rooms": "방 및 피어",
+                "login-btn": "로그�?,
+                "login-error": "비밀번호가 잘못되었습니�? 다시 시도하십시오.",
+                "menu-overview": "시스�?개요",
+                "menu-rooms": "�?�?피어",
                 "menu-tokens": "연결 토큰",
                 "menu-settings": "설정 센터",
-                "role-admin": "시스템 관리자",
+                "role-admin": "시스�?관리자",
                 "stat-status": "서버 상태",
-                "stat-online": "작동 중",
-                "stat-active-rooms": "활성화된 방",
-                "stat-connected-peers": "총 연결 피어",
-                "stat-total-traffic": "트래픽 (수신/송신)",
+                "stat-online": "작동 �?,
+                "stat-active-rooms": "활성화된 �?,
+                "stat-connected-peers": "�?연결 피어",
+                "stat-total-traffic": "트래�?(수신/송신)",
                 "topo-map-title": "네트워크 토폴로지",
-                "topo-no-nodes": "연결된 노드가 없습니다. WSS 릴레이 서버가 비어 있습니다.",
-                "rooms-list-title": "활성 릴레이 방 목록",
-                "th-room-name": "방 ID",
-                "th-peer-count": "연결 피어 수",
+                "topo-no-nodes": "연결�?노드가 없습니다. WSS 릴레�?서버가 비어 있습니다.",
+                "rooms-list-title": "활성 릴레�?�?목록",
+                "th-room-name": "�?ID",
+                "th-peer-count": "연결 피어 �?,
                 "th-actions": "작업",
                 "btn-close": "닫기",
                 "th-peer-id": "피어 ID",
-                "th-virtual-ip": "가상 IP",
-                "th-hostname": "호스트 이름",
+                "th-virtual-ip": "가�?IP",
+                "th-hostname": "호스�?이름",
                 "th-version": "버전",
-                "th-rx-tx": "수신 / 송신 트래픽",
+                "th-rx-tx": "수신 / 송신 트래�?,
                 "th-conn-time": "연결 시간",
-                "tokens-title": "클라이언트 연결 토큰",
+                "tokens-title": "클라이언�?연결 토큰",
                 "btn-gen-token": "토큰 생성",
                 "th-token": "토큰",
                 "th-desc": "설명",
-                "th-created": "생성일",
+                "th-created": "생성�?,
                 "settings-general": "일반 설정",
-                "set-req-token-title": "연결 토큰 필수 검증",
-                "set-req-token-desc": "EasyTier 클라이언트가 연결할 때 유효한 token 매개변수를 전송하도록 강제합니다.",
-                "settings-admin-pass": "관리자 비밀번호 변경",
-                "set-new-pass": "새 비밀번호",
-                "btn-save": "비밀번호 저장",
+                "set-req-token-title": "연결 토큰 필수 검�?,
+                "set-req-token-desc": "EasyTier 클라이언트가 연결�?�?유효�?token 매개변수를 전송하도�?강제합니�?",
+                "settings-admin-pass": "관리자 비밀번호 변�?,
+                "set-new-pass": "�?비밀번호",
+                "btn-save": "비밀번호 저�?,
                 "btn-cancel": "취소",
                 "btn-confirm": "확인",
                 "alert-security-title": "보안 경고: ",
-                "alert-security-desc": "기본 관리자 비밀번호 'admin'을 사용하고 있습니다. 지금 바로 변경하십시오.",
+                "alert-security-desc": "기본 관리자 비밀번호 'admin'�?사용하고 있습니다. 지�?바로 변경하십시�?",
                 "action-view": "피어 목록",
                 "action-kick": "추방",
                 "action-ban": "차단 목록",
                 "action-delete": "삭제",
-                "msg-changed-pass": "비밀번호가 성공적으로 변경되었습니다!",
-                "msg-gen-success": "토큰이 생성되었습니다!",
-                "msg-kicked-success": "피어가 성공적으로 추방되었습니다!",
-                "msg-deleted-success": "토큰이 삭제되었습니다!",
-                "set-pass-env-note": "관리자 비밀번호는 Cloudflare Workers 대시보드의 ADMIN_PASSWORD 환경 변수로 설정합니다. 변경 사항은 재배포 후 적용됩니다."
+                "msg-changed-pass": "비밀번호가 성공적으�?변경되었습니다!",
+                "msg-gen-success": "토큰�?생성되었습니�?",
+                "msg-kicked-success": "피어가 성공적으�?추방되었습니�?",
+                "msg-deleted-success": "토큰�?삭제되었습니�?",
+                "set-pass-env-note": "관리자 비밀번호�?Cloudflare Workers 대시보드의 ADMIN_PASSWORD 환경 변수로 설정합니�? 변�?사항은 재배�?�?적용됩니�?"
             }
         };
 
@@ -1351,7 +1351,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (res.ok) {
-                    showDashboard();
+                showDashboard();
                 } else {
                     showLogin();
                 }
@@ -1375,7 +1375,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                     localStorage.setItem('easytier_admin_token', token);
                     document.getElementById('passwordInput').value = '';
                     document.getElementById('loginError').style.display = 'none';
-                    showDashboard();
+                    verifyToken();
                 } else {
                     document.getElementById('loginError').style.display = 'block';
                 }
@@ -1429,13 +1429,13 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         function updateCountdownText() {
             const refreshText = document.getElementById('refreshText');
             if (currentLang === 'zh-CN') {
-                refreshText.innerText = \`自动刷新于 \${countdown} 秒内\`;
+                refreshText.innerText = \`自动刷新�?\${countdown} 秒内\`;
             } else if (currentLang === 'zh-TW') {
-                refreshText.innerText = \`自動重新整理於 \${countdown} 秒內\`;
+                refreshText.innerText = \`自動重新整理�?\${countdown} 秒內\`;
             } else if (currentLang === 'ja') {
                 refreshText.innerText = \`\${countdown}秒で自動更新\`;
             } else if (currentLang === 'ko') {
-                refreshText.innerText = \`\${countdown}초 후 자동 새로고침\`;
+                refreshText.innerText = \`\${countdown}�?�?자동 새로고침\`;
             } else {
                 refreshText.innerText = \`Auto-refresh in \${countdown}s\`;
             }
@@ -1914,3 +1914,6 @@ export const serveAdminDashboard = `<!DOCTYPE html>
 </body>
 </html>
 `;
+
+
+
