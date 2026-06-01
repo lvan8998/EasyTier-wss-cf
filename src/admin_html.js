@@ -1750,7 +1750,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 
                 // Mouseover details
                 const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-                title.textContent = 'Peer ID: ' + peer.peerId + '\nHostname: ' + (peer.hostname || 'N/A') + '\nIP: ' + (peer.ipv4Addr || 'N/A');
+                title.textContent = 'Peer ID: ' + peer.peerId + '\\nHostname: ' + (peer.hostname || 'N/A') + '\\nIP: ' + (peer.ipv4Addr || 'N/A');
                 peerNode.appendChild(title);
                 svg.appendChild(peerNode);
 
