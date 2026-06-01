@@ -1803,7 +1803,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                     '<td style="font-weight: 600; color: #ffffff;">' + room.roomId + '</td>' +
                     '<td><span class="badge-status badge-success">' + room.peerCount + '</span></td>' +
                     '<td>' +
-                        '<button class="btn-action" onclick="viewRoomPeers(\'' + room.roomId + '\')">' +
+                        '<button class="btn-action" onclick="viewRoomPeers(' + JSON.stringify(room.roomId) + ')">' +
                             '<i data-lucide="eye" style="width: 14px; height: 14px;"></i> ' + translations[currentLang]['action-view'] +
                         '</button>' +
                     '</td>';
@@ -1855,7 +1855,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                     '<td style="font-size: 0.85rem;">' + formatBytes(peer.rxBytes) + ' / ' + formatBytes(peer.txBytes) + '</td>' +
                     '<td>' + timeString + '</td>' +
                     '<td>' +
-                            '<button class="btn-action btn-danger-action" onclick="kickPeer(\'' + peer.peerId + '\')">' +
+                            '<button class="btn-action btn-danger-action" onclick="kickPeer(' + JSON.stringify(peer.peerId) + ')">' +
                             '<i data-lucide="user-minus" style="width: 14px; height: 14px;"></i> ' + translations[currentLang]['action-kick'] +
                         '</button>' +
                     '</td>';
@@ -1906,7 +1906,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                         '<td>' + (tok.description || '') + '</td>' +
                         '<td style="color: var(--text-secondary);">' + date + '</td>' +
                         '<td>' +
-                            '<button class="btn-action btn-danger-action" onclick="deleteToken(\'' + tok.token + '\')">' +
+                            '<button class="btn-action btn-danger-action" onclick="deleteToken(' + JSON.stringify(tok.token) + ')">' +
                                 '<i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> ' + translations[currentLang]['action-delete'] +
                             '</button>' +
                         '</td>';
