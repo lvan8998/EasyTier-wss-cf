@@ -965,6 +965,29 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                                 <span class="slider"></span>
                             </label>
                         </div>
+                        <div class="table-header-row" style="margin-top: 1.25rem;">
+                            <span class="table-title" data-i18n="easytier-configs-title">EasyTier Configurations</span>
+                            <button class="btn-create" onclick="openEasyTierConfigModal()">
+                                <i data-lucide="plus"></i>
+                                <span data-i18n="btn-add-easytier-config">Add EasyTier Config</span>
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th-config-name">Name</th>
+                                        <th data-i18n="th-wss-url">WSS Address</th>
+                                        <th data-i18n="th-room-id">Room ID</th>
+                                        <th data-i18n="th-config-token">Client Token</th>
+                                        <th data-i18n="th-created">Created At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="easyTierConfigsTableBody">
+                                    <!-- Dynamic -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="settings-title" data-i18n="settings-admin-pass">Admin Password</div>
@@ -986,6 +1009,39 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeCreateTokenModal()" data-i18n="btn-cancel">Cancel</button>
                     <button type="submit" class="btn-submit" style="width: auto; padding: 0.6rem 1.5rem;" data-i18n="btn-confirm">Generate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE EASYTIER CONFIG -->
+    <div id="easyTierConfigModal" class="modal">
+        <div class="modal-card">
+            <h3 class="modal-title" data-i18n="easytier-config-modal-title">Add EasyTier Config</h3>
+            <form onsubmit="handleCreateEasyTierConfig(event)">
+                <div class="form-group">
+                    <label for="easyTierConfigNameInput" data-i18n="easytier-config-name">Config Name</label>
+                    <input type="text" id="easyTierConfigNameInput" class="form-control" data-i18n-placeholder="easytier-config-name-ph" placeholder="Home Node" required>
+                </div>
+                <div class="form-group">
+                    <label for="easyTierConfigWssInput" data-i18n="easytier-config-wss">WSS Address</label>
+                    <input type="url" id="easyTierConfigWssInput" class="form-control" data-i18n-placeholder="easytier-config-wss-ph" placeholder="wss://example.com/ws" required>
+                </div>
+                <div class="form-group">
+                    <label for="easyTierConfigRoomInput" data-i18n="easytier-config-room">Room ID</label>
+                    <input type="text" id="easyTierConfigRoomInput" class="form-control" data-i18n-placeholder="easytier-config-room-ph" placeholder="default">
+                </div>
+                <div class="form-group">
+                    <label for="easyTierConfigTokenInput" data-i18n="easytier-config-token">Client Token</label>
+                    <input type="text" id="easyTierConfigTokenInput" class="form-control" data-i18n-placeholder="easytier-config-token-ph" placeholder="Optional token">
+                </div>
+                <div class="form-group">
+                    <label for="easyTierConfigNotesInput" data-i18n="easytier-config-notes">Notes</label>
+                    <textarea id="easyTierConfigNotesInput" class="form-control" rows="3" data-i18n-placeholder="easytier-config-notes-ph" placeholder="Optional notes"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEasyTierConfigModal()" data-i18n="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn-submit" style="width: auto; padding: 0.6rem 1.5rem;" data-i18n="btn-confirm">Confirm</button>
                 </div>
             </form>
         </div>
@@ -1029,6 +1085,25 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         "settings-general": "General Configuration",
         "set-req-token-title": "Require Connection Token",
         "set-req-token-desc": "Enforce EasyTier clients to connect with a valid token parameter.",
+        "easytier-configs-title": "EasyTier Configurations",
+        "btn-add-easytier-config": "Add EasyTier Config",
+        "th-config-name": "Name",
+        "th-wss-url": "WSS Address",
+        "th-room-id": "Room ID",
+        "th-config-token": "Client Token",
+        "easytier-config-modal-title": "Add EasyTier Config",
+        "easytier-config-name": "Config Name",
+        "easytier-config-wss": "WSS Address",
+        "easytier-config-room": "Room ID",
+        "easytier-config-token": "Client Token",
+        "easytier-config-notes": "Notes",
+        "easytier-config-name-ph": "Home Node",
+        "easytier-config-wss-ph": "wss://example.com/ws",
+        "easytier-config-room-ph": "default",
+        "easytier-config-token-ph": "Optional token",
+        "easytier-config-notes-ph": "Optional notes",
+        "easytier-config-empty": "No EasyTier configs yet. Click \"Add EasyTier Config\" to create one.",
+        "msg-config-added": "EasyTier config added successfully!",
         "settings-admin-pass": "Change Admin Password",
         "set-new-pass": "New Password",
         "btn-save": "Save Password",
@@ -1323,6 +1398,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         let globalStats = { rooms: [], totalPeers: 0, totalRx: 0, totalTx: 0 };
         let activeSelectedRoomId = null;
         let authCheckSeq = 0;
+        let easyTierConfigs = [];
 
         // Detect language
         const browserLang = navigator.language;
@@ -1548,14 +1624,15 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         }
 
         function updateCountdownText() {
-  const refreshText = document.getElementById('refreshText');
-  const text = currentLang === 'zh-CN' ? '自动刷新 \${countdown} 秒内' :
-               currentLang === 'zh-TW' ? '自動重新整理 \${countdown} 秒內' :
-               currentLang === 'ja' ? '\${countdown}秒で自動更新' :
-               currentLang === 'ko' ? '\${countdown}초 뒤 새로고침' :
-               'Auto-refresh in \${countdown}s';
-  refreshText.innerText = text;
-}
+            const refreshText = document.getElementById('refreshText');
+            if (!refreshText) return;
+            const text = currentLang === 'zh-CN' ? ('自动刷新 ' + countdown + ' 秒内') :
+                         currentLang === 'zh-TW' ? ('自動重新整理 ' + countdown + ' 秒內') :
+                         currentLang === 'ja' ? (countdown + '秒で自動更新') :
+                         currentLang === 'ko' ? (countdown + '초 뒤 새로고침') :
+                         ('Auto-refresh in ' + countdown + 's');
+            refreshText.innerText = text;
+        }
 
 
         function formatBytes(bytes) {
@@ -1975,6 +2052,75 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 if (res.ok) {
                     const data = await res.json();
                     document.getElementById('requireTokenToggle').checked = !!data.requireToken;
+                    easyTierConfigs = Array.isArray(data.easyTierConfigs) ? data.easyTierConfigs : [];
+                    renderEasyTierConfigs();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderEasyTierConfigs() {
+            const body = document.getElementById('easyTierConfigsTableBody');
+            if (!body) return;
+            body.innerHTML = '';
+            if (!easyTierConfigs.length) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">' + translations[currentLang]['easytier-config-empty'] + '</td></tr>';
+                return;
+            }
+
+            easyTierConfigs.forEach(config => {
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td style="font-weight: 600; color: #ffffff;">' + (config.name || '') + '</td>' +
+                    '<td style="font-family: monospace; font-size: 0.85rem; word-break: break-all;">' + (config.wssUrl || '') + '</td>' +
+                    '<td>' + (config.roomId || 'default') + '</td>' +
+                    '<td style="font-family: monospace; font-size: 0.85rem; word-break: break-all;">' + (config.clientToken || '—') + '</td>' +
+                    '<td style="color: var(--text-secondary);">' + new Date(config.createdAt || Date.now()).toLocaleString() + '</td>';
+                body.appendChild(tr);
+            });
+        }
+
+        function openEasyTierConfigModal() {
+            document.getElementById('easyTierConfigModal').style.display = 'flex';
+        }
+
+        function closeEasyTierConfigModal() {
+            document.getElementById('easyTierConfigModal').style.display = 'none';
+            document.getElementById('easyTierConfigNameInput').value = '';
+            document.getElementById('easyTierConfigWssInput').value = '';
+            document.getElementById('easyTierConfigRoomInput').value = '';
+            document.getElementById('easyTierConfigTokenInput').value = '';
+            document.getElementById('easyTierConfigNotesInput').value = '';
+        }
+
+        async function handleCreateEasyTierConfig(e) {
+            e.preventDefault();
+            const easyTierConfig = {
+                name: document.getElementById('easyTierConfigNameInput').value.trim(),
+                wssUrl: document.getElementById('easyTierConfigWssInput').value.trim(),
+                roomId: document.getElementById('easyTierConfigRoomInput').value.trim(),
+                clientToken: document.getElementById('easyTierConfigTokenInput').value.trim(),
+                notes: document.getElementById('easyTierConfigNotesInput').value.trim(),
+            };
+
+            try {
+                const res = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token,
+                        'X-Admin-Token': token
+                    },
+                    body: JSON.stringify({ easyTierConfig })
+                });
+                if (res.ok) {
+                    alert(translations[currentLang]['msg-config-added']);
+                    closeEasyTierConfigModal();
+                    loadSettings();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.error || 'Failed to add EasyTier config');
                 }
             } catch (err) {
                 console.error(err);

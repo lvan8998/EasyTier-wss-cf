@@ -379,7 +379,16 @@ export class RelayRoom {
 
     const getTokens = async () => (await storage.get('tokens')) ?? [];
     const saveTokens = async (tokens) => await storage.put('tokens', tokens);
-    const getConfig = async () => (await storage.get('config')) ?? { requireToken: false };
+    const getConfig = async () => {
+      const config = (await storage.get('config')) ?? {};
+      if (!Array.isArray(config.easyTierConfigs)) {
+        config.easyTierConfigs = [];
+      }
+      if (config.requireToken === undefined) {
+        config.requireToken = false;
+      }
+      return config;
+    };
     const saveConfig = async (config) => await storage.put('config', config);
     const getDir = async () => (await storage.get('directory')) ?? {};
 
@@ -490,8 +499,26 @@ export class RelayRoom {
       if (body.requireToken !== undefined) {
         config.requireToken = !!body.requireToken;
       }
+      if (body.easyTierConfig && typeof body.easyTierConfig === 'object') {
+        const nextConfig = {
+          id: crypto.randomUUID(),
+          name: String(body.easyTierConfig.name || '').trim(),
+          wssUrl: String(body.easyTierConfig.wssUrl || '').trim(),
+          roomId: String(body.easyTierConfig.roomId || '').trim(),
+          clientToken: String(body.easyTierConfig.clientToken || '').trim(),
+          notes: String(body.easyTierConfig.notes || '').trim(),
+          createdAt: new Date().toISOString(),
+        };
+        if (!nextConfig.name || !nextConfig.wssUrl) {
+          return new Response(JSON.stringify({ error: 'name and wssUrl are required' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        config.easyTierConfigs.unshift(nextConfig);
+      }
       await saveConfig(config);
-      return new Response(JSON.stringify({ ok: true }), {
+      return new Response(JSON.stringify({ ok: true, config }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
