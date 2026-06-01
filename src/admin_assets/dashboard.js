@@ -18,6 +18,9 @@ export const dashboardScript = String.raw`
     } else if (tabId === 'tokens') {
       document.getElementById('tabTokens').classList.add('active');
       api.loadTokens();
+    } else if (tabId === 'configs') {
+      document.getElementById('tabConfigs').classList.add('active');
+      api.loadEasyTierConfigs();
     } else if (tabId === 'settings') {
       document.getElementById('tabSettings').classList.add('active');
       api.loadSettings();

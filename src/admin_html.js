@@ -783,6 +783,10 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                         <i data-lucide="key-round"></i>
                         <span data-i18n="menu-tokens">Client Tokens</span>
                     </li>
+                    <li class="menu-item" onclick="switchTab('configs', this)">
+                        <i data-lucide="server"></i>
+                        <span data-i18n="menu-configs">EasyTier Configurations</span>
+                    </li>
                     <li class="menu-item" onclick="switchTab('settings', this)">
                         <i data-lucide="settings"></i>
                         <span data-i18n="menu-settings">Settings</span>
@@ -950,6 +954,35 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 </div>
             </div>
 
+            <!-- TAB: CONFIGS -->
+            <div id="tabConfigs" class="tab-content">
+                <div class="table-card">
+                    <div class="table-header-row">
+                        <span class="table-title" data-i18n="easytier-configs-title">EasyTier Configurations</span>
+                        <button class="btn-create" onclick="openEasyTierConfigModal()">
+                            <i data-lucide="plus"></i>
+                            <span data-i18n="btn-add-easytier-config">Add EasyTier Config</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th-config-name">Name</th>
+                                    <th data-i18n="th-wss-url">WSS Address</th>
+                                    <th data-i18n="th-room-id">Room ID</th>
+                                    <th data-i18n="th-config-token">Client Token</th>
+                                    <th data-i18n="th-created">Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="easyTierConfigsTableBody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB: SETTINGS -->
             <div id="tabSettings" class="tab-content">
                 <div class="settings-card">
@@ -964,29 +997,6 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                                 <input type="checkbox" id="requireTokenToggle" onchange="handleToggleRequireToken(this.checked)">
                                 <span class="slider"></span>
                             </label>
-                        </div>
-                        <div class="table-header-row" style="margin-top: 1.25rem;">
-                            <span class="table-title" data-i18n="easytier-configs-title">EasyTier Configurations</span>
-                            <button class="btn-create" onclick="openEasyTierConfigModal()">
-                                <i data-lucide="plus"></i>
-                                <span data-i18n="btn-add-easytier-config">Add EasyTier Config</span>
-                            </button>
-                        </div>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th data-i18n="th-config-name">Name</th>
-                                        <th data-i18n="th-wss-url">WSS Address</th>
-                                        <th data-i18n="th-room-id">Room ID</th>
-                                        <th data-i18n="th-config-token">Client Token</th>
-                                        <th data-i18n="th-created">Created At</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="easyTierConfigsTableBody">
-                                    <!-- Dynamic -->
-                                </tbody>
-                            </table>
                         </div>
                     </div>
 
@@ -1057,6 +1067,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         "menu-overview": "Overview",
         "menu-rooms": "Rooms & Peers",
         "menu-tokens": "Client Tokens",
+        "menu-configs": "EasyTier Configurations",
         "menu-settings": "Settings",
         "role-admin": "Administrator",
         "stat-status": "Server Status",

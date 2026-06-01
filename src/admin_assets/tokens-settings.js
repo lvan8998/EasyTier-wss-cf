@@ -15,7 +15,7 @@ export const tokensSettingsScript = String.raw`
       body.innerHTML = '';
       const tokens = data.tokens || [];
       if (!tokens.length) {
-        body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No tokens generated yet. Click Add EasyTier Config to start.</td></tr>';
+        body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No tokens generated yet. Click Generate Token to create one.</td></tr>';
         return;
       }
       tokens.forEach((tok) => {
@@ -92,6 +92,19 @@ export const tokensSettingsScript = String.raw`
         const data = await res.json();
         const toggle = document.getElementById('requireTokenToggle');
         if (toggle) toggle.checked = !!data.requireToken;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  api.loadEasyTierConfigs = async function loadEasyTierConfigs() {
+    try {
+      const res = await fetch('/api/config', {
+        headers: { 'Authorization': 'Bearer ' + token, 'X-Admin-Token': token }
+      });
+      if (res.ok) {
+        const data = await res.json();
         window.easyTierConfigs = Array.isArray(data.easyTierConfigs) ? data.easyTierConfigs : [];
         api.renderEasyTierConfigs();
       }
@@ -155,7 +168,7 @@ export const tokensSettingsScript = String.raw`
       if (res.ok) {
         alert(translations[currentLang]['msg-config-added']);
         api.closeEasyTierConfigModal();
-        api.loadSettings();
+        api.loadEasyTierConfigs();
       } else {
         const errorData = await res.json().catch(() => ({}));
         alert(errorData.error || 'Failed to add EasyTier config');

@@ -67,6 +67,7 @@ window.closeCreateTokenModal = api.closeCreateTokenModal;
 window.handleCreateToken = api.handleCreateToken;
 window.deleteToken = api.deleteToken;
 window.loadSettings = api.loadSettings;
+window.loadEasyTierConfigs = api.loadEasyTierConfigs;
 window.openEasyTierConfigModal = api.openEasyTierConfigModal;
 window.closeEasyTierConfigModal = api.closeEasyTierConfigModal;
 window.handleCreateEasyTierConfig = api.handleCreateEasyTierConfig;
