@@ -1269,6 +1269,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         let countdown = 5;
         let globalStats = { rooms: [], totalPeers: 0, totalRx: 0, totalTx: 0 };
         let activeSelectedRoomId = null;
+        let authCheckSeq = 0;
 
         // Detect language
         const browserLang = navigator.language;
@@ -1356,6 +1357,8 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         }
 
         async function verifyToken() {
+            const verifySeq = ++authCheckSeq;
+            const tokenSnapshot = token;
             try {
                 const res = await fetch('/api/auth/verify', {
                     headers: {
@@ -1363,12 +1366,18 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                         'X-Admin-Token': token
                     }
                 });
+                if (verifySeq !== authCheckSeq || tokenSnapshot !== token) {
+                    return;
+                }
                 if (res.ok) {
                 showDashboard();
                 } else {
                     showLogin();
                 }
             } catch (e) {
+                if (verifySeq !== authCheckSeq || tokenSnapshot !== token) {
+                    return;
+                }
                 showLogin();
             }
         }
@@ -1376,6 +1385,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         async function handleLogin(e) {
             e.preventDefault();
             const password = document.getElementById('passwordInput').value;
+            const loginSeq = ++authCheckSeq;
             try {
                 const res = await fetch('/api/auth', {
                     method: 'POST',
@@ -1383,6 +1393,9 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                     body: JSON.stringify({ password })
                 });
                 const data = await res.json();
+                if (loginSeq !== authCheckSeq) {
+                    return;
+                }
                 if (res.ok && data.token) {
                     token = data.token;
                     localStorage.setItem('easytier_admin_token', token);
@@ -1399,6 +1412,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         }
 
         function handleLogout() {
+            ++authCheckSeq;
             token = '';
             localStorage.removeItem('easytier_admin_token');
             showLogin();

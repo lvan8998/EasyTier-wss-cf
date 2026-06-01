@@ -5,6 +5,7 @@ import { serveAdminDashboard } from './admin_html.js';
 import { signAdminToken, verifyAdminToken } from './auth.js';
 
 export { RelayRoom };
+export class AdminStore extends RelayRoom {}
 
 // JWT-like signing secret derived from ADMIN_PASSWORD
 function getSecret(env) {

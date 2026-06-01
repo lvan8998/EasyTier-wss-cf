@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "wrangler dev --ip 0.0.0.0",
     "start": "wrangler dev",
-    "test": "powershell -NoProfile -Command \"Set-Location -LiteralPath $env:INIT_CWD; node --test ./test/auth.test.js\""
+    "test": "powershell -NoProfile -Command \"Set-Location -LiteralPath $env:INIT_CWD; node --test\""
   },
   "keywords": [],
   "author": "",
