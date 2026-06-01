@@ -3,6 +3,7 @@
 import { RelayRoom } from './worker/relay_room.js';
 import { serveAdminDashboard } from './admin_html.js';
 import { signAdminToken, verifyAdminToken } from './auth.js';
+import { getAdminAsset } from './admin_assets/index.js';
 
 export { RelayRoom };
 export class AdminStore extends RelayRoom {}
@@ -40,6 +41,20 @@ export default {
       return new Response(serveAdminDashboard, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      });
+    }
+
+    if (pathname.startsWith('/assets/admin/')) {
+      const assetName = pathname.slice('/assets/admin/'.length);
+      const asset = getAdminAsset(assetName);
+      if (!asset) {
+        return new Response('Not Found', { status: 404 });
+      }
+      return new Response(asset, {
+        headers: {
+          'Content-Type': 'application/javascript; charset=utf-8',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
         },
       });
