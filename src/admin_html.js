@@ -707,6 +707,37 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             color: #ffffff;
         }
 
+        /* Mobile Hamburger Menu */
+        .mobile-hamburger {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            width: 44px;
+            height: 44px;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .mobile-sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 15;
+        }
+
+        .mobile-sidebar-overlay.active {
+            display: block;
+        }
+
         /* Custom Alert Banner */
         .alert-banner {
             background: rgba(245, 158, 11, 0.1);
@@ -719,6 +750,342 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             align-items: center;
             gap: 0.75rem;
             margin-bottom: 2rem;
+        }
+
+        /* RESPONSIVE MEDIA QUERIES */
+        @media (max-width: 768px) {
+            aside {
+                width: 250px;
+                padding: 1.5rem 1rem;
+            }
+            main {
+                padding: 1.5rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+            .stat-card {
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+            }
+            .stat-val {
+                font-size: 1.3rem;
+            }
+            .page-title {
+                font-size: 1.5rem;
+            }
+            .refresh-indicator {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+            .top-nav {
+                flex-direction: column;
+                gap: 1rem;
+                margin-bottom: 1rem;
+            }
+            .header-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .table-title {
+                font-size: 1rem;
+            }
+            th {
+                padding: 0.75rem;
+                font-size: 0.75rem;
+            }
+            td {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+            .btn-action {
+                padding: 0.35rem 0.7rem;
+                font-size: 0.75rem;
+            }
+            .btn-create {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                overflow-y: auto;
+            }
+            #appLayout {
+                flex-direction: column;
+            }
+            .mobile-hamburger {
+                display: flex;
+            }
+            .mobile-top-nav {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: var(--sidebar-bg);
+                border-bottom: 1px solid var(--border-color);
+                padding: 1rem;
+                gap: 0.5rem;
+                flex-shrink: 0;
+            }
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-family: var(--font-outfit);
+                font-weight: 700;
+                color: var(--text-primary);
+                font-size: 1rem;
+                flex-grow: 1;
+            }
+            .mobile-brand i {
+                width: 20px;
+                height: 20px;
+            }
+            aside {
+                width: 280px;
+                position: fixed;
+                left: -280px;
+                top: 0;
+                height: 100vh;
+                z-index: 18;
+                transition: left 0.3s ease;
+                overflow-y: auto;
+                padding: 1rem;
+                border-right: 1px solid var(--border-color);
+            }
+            aside.mobile-open {
+                left: 0;
+            }
+            .brand {
+                font-size: 1.2rem;
+                margin-bottom: 2rem;
+            }
+            main {
+                flex-grow: 1;
+                width: 100%;
+                padding: 0;
+                height: auto;
+                overflow-y: auto;
+            }
+            .top-nav {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
+                padding: 1rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .page-title {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+            }
+            .header-controls {
+                flex-direction: row;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            .refresh-indicator {
+                flex-grow: 1;
+                font-size: 0.7rem;
+                padding: 0.3rem 0.5rem;
+            }
+            .top-lang-wrapper {
+                padding: 0.3rem 0.6rem 0.3rem 0.5rem;
+                font-size: 0.7rem;
+            }
+            .top-lang-select {
+                font-size: 0.7rem;
+            }
+            .tab-content {
+                padding: 0;
+                gap: 1.5rem;
+            }
+            #tabOverview, #tabRooms, #tabTokens, #tabConfigs, #tabSettings {
+                padding: 1rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .stat-card {
+                padding: 1rem;
+                gap: 0.75rem;
+                min-height: auto;
+            }
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                flex-shrink: 0;
+            }
+            .stat-label {
+                font-size: 0.75rem;
+            }
+            .stat-val {
+                font-size: 1.2rem;
+            }
+            .topo-card {
+                min-height: 300px;
+                padding: 1rem;
+            }
+            .topo-body {
+                min-height: 250px;
+            }
+            .topo-svg {
+                min-height: 250px;
+            }
+            .table-card {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+            .table-header-row {
+                margin-bottom: 1rem;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+            }
+            .table-title {
+                font-size: 1rem;
+                flex-basis: 100%;
+            }
+            .table-container {
+                overflow-x: auto;
+            }
+            table {
+                width: 100%;
+            }
+            table thead {
+                display: none;
+            }
+            table tr {
+                display: block;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                overflow: hidden;
+            }
+            table td {
+                display: block;
+                padding: 0.75rem;
+                text-align: left;
+                border: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+                position: relative;
+                padding-left: 50%;
+            }
+            table td:last-child {
+                border-bottom: none;
+            }
+            table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0.75rem;
+                top: 0.75rem;
+                color: var(--text-secondary);
+                font-weight: 600;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
+            tr:hover td {
+                background: transparent;
+            }
+            .btn-action {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+                min-height: 36px;
+                min-width: 44px;
+                display: inline-flex;
+            }
+            .btn-create {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+                min-height: 44px;
+                width: 100%;
+            }
+            .btn-submit {
+                padding: 0.75rem;
+                font-size: 0.95rem;
+                min-height: 44px;
+            }
+            .btn-cancel {
+                padding: 0.6rem 1rem;
+                min-height: 44px;
+            }
+            .modal-card {
+                max-width: calc(100% - 2rem);
+                padding: 1.5rem 1rem;
+                border-radius: 16px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .modal-title {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+            .modal-actions {
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+                flex-wrap: wrap;
+            }
+            .btn-cancel, .btn-submit {
+                flex: 1;
+                min-width: 100px;
+            }
+            .form-group {
+                margin-bottom: 1rem;
+            }
+            .form-control {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+                min-height: 44px;
+            }
+            textarea.form-control {
+                min-height: 100px;
+                resize: vertical;
+            }
+            .form-control:focus {
+                border-color: var(--primary);
+                background: rgba(0, 0, 0, 0.5);
+            }
+            .settings-card {
+                max-width: 100%;
+                padding: 1rem;
+            }
+            .settings-title {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+            .switch-control {
+                margin-bottom: 1rem;
+            }
+            .switch-label h4 {
+                font-size: 0.95rem;
+            }
+            .switch-label p {
+                font-size: 0.8rem;
+                line-height: 1.4;
+            }
+            .login-card {
+                padding: 2rem 1.5rem;
+                max-width: calc(100% - 1rem);
+                margin: 1rem auto;
+            }
+            .login-logo {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            .login-copy h1 {
+                font-size: 1rem;
+            }
+            .login-copy p {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
         }
     </style>
 </head>
@@ -763,6 +1130,21 @@ export const serveAdminDashboard = `<!DOCTYPE html>
 
     <!-- APP LAYOUT -->
     <div id="appLayout">
+        <!-- Mobile Top Navigation (only visible on small screens) -->
+        <div class="mobile-top-nav" style="display: none;">
+            <button class="mobile-hamburger" onclick="toggleMobileSidebar()" title="Menu">
+                <i data-lucide="menu"></i>
+            </button>
+            <div class="mobile-brand">
+                <i data-lucide="network"></i>
+                <span>EasyTier</span>
+            </div>
+            <div style="width: 44px;"></div>
+        </div>
+
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
         <!-- Sidebar -->
         <aside>
             <div class="flex-col">
@@ -771,23 +1153,23 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                     <span>EasyTier Relay</span>
                 </div>
                 <ul class="menu-list">
-                    <li class="menu-item active" onclick="switchTab('overview', this)">
+                    <li class="menu-item active" onclick="switchTab('overview', this); closeMobileSidebar();">
                         <i data-lucide="layout-dashboard"></i>
                         <span data-i18n="menu-overview">Overview</span>
                     </li>
-                    <li class="menu-item" onclick="switchTab('rooms', this)">
+                    <li class="menu-item" onclick="switchTab('rooms', this); closeMobileSidebar();">
                         <i data-lucide="folder-tree"></i>
                         <span data-i18n="menu-rooms">Rooms & Peers</span>
                     </li>
-                    <li class="menu-item" onclick="switchTab('tokens', this)">
+                    <li class="menu-item" onclick="switchTab('tokens', this); closeMobileSidebar();">
                         <i data-lucide="key-round"></i>
                         <span data-i18n="menu-tokens">Client Tokens</span>
                     </li>
-                    <li class="menu-item" onclick="switchTab('configs', this)">
+                    <li class="menu-item" onclick="switchTab('configs', this); closeMobileSidebar();">
                         <i data-lucide="server"></i>
                         <span data-i18n="menu-configs">EasyTier Configurations</span>
                     </li>
-                    <li class="menu-item" onclick="switchTab('settings', this)">
+                    <li class="menu-item" onclick="switchTab('settings', this); closeMobileSidebar();">
                         <i data-lucide="settings"></i>
                         <span data-i18n="menu-settings">Settings</span>
                     </li>
@@ -1352,6 +1734,96 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             }
         }
 
+        // Mobile Menu Functions
+        function toggleMobileSidebar() {
+            const aside = document.querySelector('aside');
+            const overlay = document.querySelector('.mobile-sidebar-overlay');
+            aside.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        function closeMobileSidebar() {
+            const aside = document.querySelector('aside');
+            const overlay = document.querySelector('.mobile-sidebar-overlay');
+            aside.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+        }
+
+        // Show mobile nav on small screens
+        function setupMobileNav() {
+            const mobileTopNav = document.querySelector('.mobile-top-nav');
+            const appLayout = document.getElementById('appLayout');
+            
+            function updateMobileNav() {
+                if (window.innerWidth <= 480) {
+                    mobileTopNav.style.display = 'flex';
+                } else {
+                    mobileTopNav.style.display = 'none';
+                    closeMobileSidebar();
+                }
+            }
+            
+            updateMobileNav();
+            window.addEventListener('resize', updateMobileNav);
+        }
+
+        // Add data-label attributes to table cells for mobile card view
+        function setupTableLabels() {
+            const tableLabels = {
+                'roomsTableBody': {
+                    0: 'Room ID',
+                    1: 'Active Peers',
+                    2: 'Actions'
+                },
+                'peersTableBody': {
+                    0: 'Peer ID',
+                    1: 'Virtual IP',
+                    2: 'Hostname',
+                    3: 'Version',
+                    4: 'Traffic (Rx/Tx)',
+                    5: 'Connected Time',
+                    6: 'Actions'
+                },
+                'tokensTableBody': {
+                    0: 'Token',
+                    1: 'Description',
+                    2: 'Created At',
+                    3: 'Actions'
+                },
+                'easyTierConfigsTableBody': {
+                    0: 'Name',
+                    1: 'WSS Address',
+                    2: 'Room ID',
+                    3: 'Client Token',
+                    4: 'Created At'
+                }
+            };
+
+            const observer = new MutationObserver(function(mutations) {
+                for (const table in tableLabels) {
+                    const tbody = document.getElementById(table);
+                    if (tbody) {
+                        const rows = tbody.querySelectorAll('tr');
+                        rows.forEach(row => {
+                            const tds = row.querySelectorAll('td');
+                            tds.forEach((td, index) => {
+                                if (!td.hasAttribute('data-label') && tableLabels[table][index]) {
+                                    td.setAttribute('data-label', tableLabels[table][index]);
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+
+            // Observe the whole document for changes
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                characterData: true
+            });
+        }
+
         let currentLang = 'en';
         const supportedLangs = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko'];
         const languageNames = {
@@ -1409,6 +1881,13 @@ export const serveAdminDashboard = `<!DOCTYPE html>
     <script src="/assets/admin/dashboard.js" defer></script>
     <script src="/assets/admin/tokens-settings.js" defer></script>
     <script src="/assets/admin/boot.js" defer></script>
+    <script>
+        // Initialize mobile features after all scripts are loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setupMobileNav();
+            setupTableLabels();
+        });
+    </script>
 </body>
 </html>
 `;
