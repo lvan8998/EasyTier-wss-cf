@@ -162,24 +162,11 @@ export const serveAdminDashboard = `<!DOCTYPE html>
         #appLayout {
             display: flex;
             height: 100vh;
-            width: 100vw;
+            max-width: 960px;
+            margin: 0 auto;
             opacity: 0;
             transition: opacity 0.5s ease;
         }
-
-        /* Sidebar */
-        aside {
-            width: 260px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
         .brand {
             font-family: var(--font-outfit);
             font-size: 1.35rem;
@@ -711,36 +698,6 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             color: #ffffff;
         }
 
-        /* Mobile Hamburger Menu */
-        .mobile-hamburger {
-            display: none;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            width: 44px;
-            height: 44px;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-        }
-
-        .mobile-sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 15;
-        }
-
-        .mobile-sidebar-overlay.active {
-            display: block;
-        }
 
         /* Custom Alert Banner */
         .alert-banner {
@@ -758,10 +715,6 @@ export const serveAdminDashboard = `<!DOCTYPE html>
 
         /* RESPONSIVE MEDIA QUERIES */
         @media (max-width: 768px) {
-            aside {
-                width: 250px;
-                padding: 1.5rem 1rem;
-            }
             main {
                 padding: 1.5rem;
             }
@@ -824,36 +777,6 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             #appLayout {
                 flex-direction: column;
             }
-            .mobile-hamburger {
-                display: flex;
-            }
-            .mobile-top-nav {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: var(--sidebar-bg);
-                border-bottom: 1px solid var(--border-color);
-                padding: 1rem;
-                gap: 0.5rem;
-                flex-shrink: 0;
-            }
-            .mobile-brand {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                font-family: var(--font-outfit);
-                font-weight: 700;
-                color: var(--text-primary);
-                font-size: 1rem;
-                flex-grow: 1;
-            }
-            .mobile-brand i {
-                width: 20px;
-                height: 20px;
-            }
-            aside {
-                width: 280px;
-                position: fixed;
                 left: -280px;
                 top: 0;
                 height: 100vh;
@@ -863,9 +786,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 padding: 1rem;
                 border-right: 1px solid var(--border-color);
             }
-            aside.mobile-open {
-                left: 0;
-            }
+        }
             .brand {
                 font-size: 1.2rem;
                 margin-bottom: 2rem;
@@ -1138,44 +1059,9 @@ export const serveAdminDashboard = `<!DOCTYPE html>
     <!-- APP LAYOUT -->
     <div id="appLayout">
         <!-- Mobile Top Navigation (only visible on small screens) -->
-        <div class="mobile-top-nav" style="display: none;">
-            <button class="mobile-hamburger" onclick="toggleMobileSidebar()" title="Menu">
-                <i data-lucide="menu"></i>
-            </button>
-            <div class="mobile-brand">
-                <i data-lucide="network"></i>
-                <span>EasyTier</span>
-            </div>
-            <div style="width: 44px;"></div>
-        </div>
-
-        <!-- Sidebar Overlay for Mobile -->
-        <div class="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+                <!-- Sidebar Overlay for Mobile -->
 
         <!-- Sidebar -->
-        <aside>
-            <div class="flex-col">
-                <div class="brand">
-                    <i data-lucide="network" style="color: var(--primary);"></i>
-                    <span>EasyTier Relay</span>
-                </div>
-                <ul class="menu-list">
-                    <li class="menu-item active" onclick="switchTab('overview', this); closeMobileSidebar();">
-                        <i data-lucide="layout-dashboard"></i>
-                        <span data-i18n="menu-overview">Overview</span>
-                    </li>
-
-                </ul>
-            </div>
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <span id="adminText" data-i18n="role-admin">Administrator</span>
-                    <button class="logout-btn" onclick="handleLogout()" title="Logout">
-                        <i data-lucide="log-out" style="width: 18px; height: 18px;"></i>
-                    </button>
-                </div>
-            </div>
-        </aside>
 
         <!-- Main Content -->
         <main>
@@ -1280,6 +1166,20 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             </div>
 
 
+                <!-- WSS Connection Test -->
+                <div class="table-card" style="margin-top: 2rem;">
+                    <div class="table-header-row">
+                        <span class="table-title" data-i18n="wss-test-title">WSS Connection Test</span>
+                        <button class="btn-action" onclick="testWssConnection()" id="wssTestBtn">
+                            <i data-lucide="plug-2"></i>
+                            <span data-i18n="wss-test-btn">Test Connection</span>
+                        </button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div id="wssTestUrl" style="color: var(--text-secondary); font-family: monospace; font-size: 0.85rem; word-break: break-all;"></div>
+                        <div id="wssTestStatus" style="font-weight: 600;" data-i18n="wss-test-not-tested">Click "Test Connection" to verify WSS relay</div>
+                    </div>
+                </div>
         </main>
     </div>
 
@@ -1415,39 +1315,6 @@ ${buildAdminI18nScript()}
         }
 
         // Mobile Menu Functions
-        function toggleMobileSidebar() {
-            const aside = document.querySelector('aside');
-            const overlay = document.querySelector('.mobile-sidebar-overlay');
-            aside.classList.toggle('mobile-open');
-            overlay.classList.toggle('active');
-        }
-
-        function closeMobileSidebar() {
-            const aside = document.querySelector('aside');
-            const overlay = document.querySelector('.mobile-sidebar-overlay');
-            aside.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-        }
-
-        // Show mobile nav on small screens
-        function setupMobileNav() {
-            const mobileTopNav = document.querySelector('.mobile-top-nav');
-            const appLayout = document.getElementById('appLayout');
-            
-            function updateMobileNav() {
-                if (window.innerWidth <= 480) {
-                    mobileTopNav.style.display = 'flex';
-                } else {
-                    mobileTopNav.style.display = 'none';
-                    closeMobileSidebar();
-                }
-            }
-            
-            updateMobileNav();
-            window.addEventListener('resize', updateMobileNav);
-        }
-
-        function getTableLabels() {
             const t = translations[currentLang] || translations.en;
             return {
                 roomsTableBody: {
@@ -1521,10 +1388,65 @@ ${buildAdminI18nScript()}
     <script>
         // Initialize mobile features after all scripts are loaded
         document.addEventListener('DOMContentLoaded', function() {
-            setupMobileNav();
             setupTableLabels();
         });
-    </script>
+    
+        // WSS Connection Test
+        window.testWssConnection = function() {
+            const btn = document.getElementById('wssTestBtn');
+            const status = document.getElementById('wssTestStatus');
+            const urlDisplay = document.getElementById('wssTestUrl');
+            if (!btn || !status || !urlDisplay) return;
+            
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            status.textContent = EasyTierAdmin.t('wss-test-testing', 'Testing...');
+            status.style.color = 'var(--warning)';
+            
+            try {
+                const wsUrl = EasyTierAdmin.buildClientWsUrl('wss-test');
+                urlDisplay.textContent = wsUrl;
+                
+                const ws = new WebSocket(wsUrl);
+                const timeout = setTimeout(() => {
+                    ws.close();
+                    status.textContent = EasyTierAdmin.t('wss-test-timeout', 'Timeout - no response from relay');
+                    status.style.color = 'var(--danger)';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }, 8000);
+                
+                ws.onopen = function() {
+                    clearTimeout(timeout);
+                    status.textContent = EasyTierAdmin.t('wss-test-success', 'Connected! Relay is reachable via WSS');
+                    status.style.color = 'var(--success)';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    ws.close();
+                };
+                
+                ws.onerror = function() {
+                    clearTimeout(timeout);
+                    status.textContent = EasyTierAdmin.t('wss-test-failed', 'Connection failed - relay unreachable');
+                    status.style.color = 'var(--danger)';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                };
+            } catch(e) {
+                status.textContent = EasyTierAdmin.t('wss-test-error', 'Error') + ': ' + e.message;
+                status.style.color = 'var(--danger)';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        };
+            } catch(e) {
+                status.textContent = 'Error: ' + e.message;
+                status.style.color = 'var(--danger)';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        };
+        </script>
 </body>
 </html>
 `;

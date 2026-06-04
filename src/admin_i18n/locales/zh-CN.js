@@ -88,4 +88,12 @@ export default {
 "option-udp": "UDP",
 "option-ws": "WebSocket (WS)",
 "option-wss": "WebSocket Secure (WSS)",
+  "wss-test-title": "WSS 连接测试",
+  "wss-test-btn": "测试连接",
+  "wss-test-not-tested": "点击"测试连接"验证 WSS 中继",
+  "wss-test-testing": "测试中...",
+  "wss-test-success": "连接成功！中继可通过 WSS 访问",
+  "wss-test-failed": "连接失败 - 中继不可达",
+  "wss-test-timeout": "超时 - 中继未响应",
+  "wss-test-error": "错误",
 };

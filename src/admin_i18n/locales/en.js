@@ -88,4 +88,12 @@ export default {
 "option-udp": "UDP",
 "option-ws": "WebSocket (WS)",
 "option-wss": "WebSocket Secure (WSS)",
+  "wss-test-title": "WSS Connection Test",
+  "wss-test-btn": "Test Connection",
+  "wss-test-not-tested": "Click "Test Connection" to verify WSS relay",
+  "wss-test-testing": "Testing...",
+  "wss-test-success": "Connected! Relay is reachable via WSS",
+  "wss-test-failed": "Connection failed - relay unreachable",
+  "wss-test-timeout": "Timeout - no response from relay",
+  "wss-test-error": "Error",
 };
