@@ -910,7 +910,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 padding: 0;
                 gap: 1.5rem;
             }
-            #tabOverview, #tabRooms, #tabTokens, #tabConfigs, #tabSettings {
+            #tabOverview {
                 padding: 1rem;
             }
             .stats-grid {
@@ -1164,14 +1164,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                         <i data-lucide="layout-dashboard"></i>
                         <span data-i18n="menu-overview">Overview</span>
                     </li>
-                    <li class="menu-item" onclick="switchTab('rooms', this); closeMobileSidebar();">
-                        <i data-lucide="folder-tree"></i>
-                        <span data-i18n="menu-rooms">Rooms & Peers</span>
-                    </li>
-                    <li class="menu-item" onclick="switchTab('settings', this); closeMobileSidebar();">
-                        <i data-lucide="settings"></i>
-                        <span data-i18n="menu-settings">Settings</span>
-                    </li>
+
                 </ul>
             </div>
             <div class="sidebar-footer">
@@ -1256,56 +1249,6 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                         <div id="topoEmptyText" style="color: var(--text-muted); font-size: 0.95rem;" data-i18n="topo-no-nodes">No nodes connected. WSS relay is empty.</div>
                     </div>
                 </div>
-            </div>
-
-            <!-- TAB: ROOMS -->
-            <div id="tabRooms" class="tab-content">
-                <div class="table-card">
-                    <div class="table-header-row">
-                        <span class="table-title" data-i18n="rooms-list-title">Relay Rooms</span>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th data-i18n="th-room-name">Room ID</th>
-                                    <th data-i18n="th-peer-count">Active Peers</th>
-                                    <th data-i18n="th-actions">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="roomsTableBody">
-                                <!-- Dynamic -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Dynamic Room Peers Detail Box -->
-                <div id="roomPeersCard" class="table-card" style="display: none;">
-                    <div class="table-header-row">
-                        <span id="roomPeersTitle" class="table-title">Room Peers</span>
-                        <button class="btn-action" onclick="closeRoomPeers()"><i data-lucide="x"></i><span data-i18n="btn-close">Close</span></button>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th data-i18n="th-peer-id">Peer ID</th>
-                                    <th data-i18n="th-virtual-ip">Virtual IP</th>
-                                    <th data-i18n="th-hostname">Hostname</th>
-                                    <th data-i18n="th-version">Version</th>
-                                    <th data-i18n="th-rx-tx">Rx / Tx Traffic</th>
-                                    <th data-i18n="th-conn-time">Connected Time</th>
-                                    <th data-i18n="th-actions">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="peersTableBody">
-                                <!-- Dynamic -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
 
                 <!-- EasyTier Config Files Section -->
                 <div class="table-card" style="margin-top: 2rem;">
@@ -1336,14 +1279,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- TAB: SETTINGS -->
-            <div id="tabSettings" class="tab-content">
-                <div class="settings-card">
 
-                    <div class="settings-title" data-i18n="settings-admin-pass">Admin Password</div>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;" data-i18n="set-pass-env-note">The admin password is configured via the <code style="background:rgba(255,255,255,0.08);padding:0.1em 0.4em;border-radius:4px;">ADMIN_PASSWORD</code> environment variable in the Cloudflare Workers dashboard. Changes take effect after redeployment.</p>
-                </div>
-            </div>
         </main>
     </div>
 

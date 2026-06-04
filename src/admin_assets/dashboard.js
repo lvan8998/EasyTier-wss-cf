@@ -10,16 +10,8 @@ export const dashboardScript = String.raw`
     const title = el && el.querySelector('span') ? el.querySelector('span').innerText : '';
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) pageTitle.innerText = title;
-    if (tabId === 'overview') {
-      document.getElementById('tabOverview').classList.add('active');
-    } else if (tabId === 'rooms') {
-      document.getElementById('tabRooms').classList.add('active');
-      api.loadRooms();
-      api.loadEasyTierConfigs();
-    } else if (tabId === 'settings') {
-      document.getElementById('tabSettings').classList.add('active');
-      api.loadSettings();
-    }
+    document.getElementById('tabOverview').classList.add('active');
+    api.loadEasyTierConfigs();
   };
 
   api.startPolling = function startPolling() {
@@ -84,9 +76,7 @@ export const dashboardScript = String.raw`
       }
 
       api.renderTopology(roomDetails.reduce((all, room) => all.concat(room.peers || []), []));
-      if (document.getElementById('tabRooms').classList.contains('active')) {
-        api.renderRoomsTable();
-      }
+
       if (window.activeSelectedRoomId) {
         const activeRoom = roomDetails.find((room) => room && room.roomId === window.activeSelectedRoomId);
         if (activeRoom) api.renderPeersTable(activeRoom.peers || []);
