@@ -543,11 +543,19 @@ export class RelayRoom {
       }
       if (body.easyTierConfig && typeof body.easyTierConfig === 'object') {
         const input = body.easyTierConfig;
+        // When editing, preserve the existing network_secret if the new value is empty
+        let networkSecret = String(input.network_secret || "").trim();
+        if (!networkSecret && input.id) {
+          const existing = (config.easyTierConfigs || []).find((entry) => entry.id === input.id);
+          if (existing && existing.network_secret) {
+            networkSecret = existing.network_secret;
+          }
+        }
         const nextConfig = {
           id: input.id || crypto.randomUUID(),
           instance_name: String(input.instance_name || '').trim(),
           network_name: String(input.network_name || '').trim(),
-          network_secret: String(input.network_secret || '').trim(),
+          network_secret: networkSecret,
           ipv4: String(input.ipv4 || '').trim(),
           dhcp: !!input.dhcp,
           listeners: String(input.listeners || '').trim(),

@@ -678,6 +678,8 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             width: 100%;
             max-width: 500px;
             animation: slideUp 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .modal-title {
@@ -1087,6 +1089,9 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             .login-copy p {
                 font-size: 0.85rem;
                 line-height: 1.4;
+            }
+            #easyTierConfigModal [style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
             }
         }
     </style>

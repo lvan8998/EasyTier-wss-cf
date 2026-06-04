@@ -39,10 +39,10 @@ export const tokensSettingsScript = String.raw`
         '<td style="font-family: monospace; font-size: 0.85rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="' + (config.peers || '') + '">' + peersSummary + '</td>' +
         '<td style="color: var(--text-secondary);">' + new Date(config.createdAt || Date.now()).toLocaleString() + '</td>' +
         '<td style="white-space: nowrap;">' +
-        '<button type="button" class="btn-action" onclick="EasyTierAdmin.downloadEasyTierToml(' + JSON.stringify(config.id) + ')"><i data-lucide="download" style="width: 14px; height: 14px;"></i> ' + (translations[window.currentLang]['action-download-toml'] || 'Download TOML') + '</button> ' +
-        '<button type="button" class="btn-action" onclick="EasyTierAdmin.copyEasyTierCommand(' + JSON.stringify(config.id) + ')"><i data-lucide="terminal" style="width: 14px; height: 14px;"></i> ' + (translations[window.currentLang]['action-copy-cmd'] || 'Copy Cmd') + '</button> ' +
-        '<button type="button" class="btn-action" onclick="EasyTierAdmin.editEasyTierConfig(' + JSON.stringify(config.id) + ')"><i data-lucide="edit-3" style="width: 14px; height: 14px;"></i> ' + (translations[window.currentLang]['action-edit'] || 'Edit') + '</button> ' +
-        '<button type="button" class="btn-action btn-danger-action" onclick="EasyTierAdmin.deleteEasyTierConfig(' + JSON.stringify(config.id) + ')"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> ' + (translations[window.currentLang]['action-delete'] || 'Delete') + '</button></td>';
+        '<button type="button" class="btn-action" onclick="EasyTierAdmin.downloadEasyTierToml(' + "'" + config.id + "'" + ')"><i data-lucide="download" style="width: 14px; height: 14px;"></i> ' + (translations[window.currentLang]['action-download-toml'] || 'Download TOML') + '</button> ' +
+        '<button type="button" class="btn-action" onclick="EasyTierAdmin.copyEasyTierCommand(' + "'" + config.id + "'" + ')"><i data-lucide="terminal" style="width: 14px; height: 14px;"></i> ' + (translations[window.currentLang]['action-copy-cmd'] || 'Copy Cmd') + '</button> ' +
+        '<button type="button" class="btn-action" onclick="EasyTierAdmin.editEasyTierConfig(' + "'" + config.id + "'" + ')"><i data-lucide="edit-3" style="width: 14px; height: 14px;"></i> ' + (translations[window.currentLang]['action-edit'] || 'Edit') + '</button> ' +
+        '<button type="button" class="btn-action btn-danger-action" onclick="EasyTierAdmin.deleteEasyTierConfig(' + "'" + config.id + "'" + ')"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> ' + (translations[window.currentLang]['action-delete'] || 'Delete') + '</button></td>';
       body.appendChild(tr);
     });
     api.safeCreateIcons();
