@@ -1314,7 +1314,7 @@ ${buildAdminI18nScript()}
             }
         }
 
-        // Mobile Menu Functions
+        function getTableLabels() {
             const t = translations[currentLang] || translations.en;
             return {
                 roomsTableBody: {
@@ -1339,9 +1339,9 @@ ${buildAdminI18nScript()}
                 },
                 easyTierConfigsTableBody: {
                     0: t['th-config-name'],
-                    1: t['th-wss-url'],
-                    2: t['th-room-id'],
-                    3: t['th-config-token'],
+                    1: t['th-network-name'],
+                    2: t['th-virtual-ip'],
+                    3: t['th-peers'],
                     4: t['th-created'],
                     5: t['th-actions']
                 }
