@@ -76,7 +76,7 @@ export const serveAdminDashboard = `<!DOCTYPE html>
             border-radius: 20px;
             padding: 3rem;
             width: 100%;
-            max-width: 450px;
+            max-width: 360px;
             backdrop-filter: blur(20px);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             text-align: center;
