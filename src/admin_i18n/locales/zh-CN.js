@@ -20,7 +20,6 @@ export default {
   "th-actions": "操作",
   "btn-close": "关闭",
   "th-peer-id": "节点 ID",
-  "th-virtual-ip": "虚拟 IP",
   "th-hostname": "主机名",
   "th-version": "EasyTier 版本",
   "th-rx-tx": "接收 / 发送",

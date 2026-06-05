@@ -62,7 +62,6 @@ export default {
   "easytier-config-wss": "WSS 基礎位址",
   "easytier-config-room": "房間 ID",
   "easytier-config-token": "連線權杖",
-  "easytier-config-notes": "備註",
   "easytier-config-name-ph": "例如：家用節點",
   "easytier-config-wss-ph": "wss://your-domain/ws",
   "easytier-config-room-ph": "default",

@@ -62,7 +62,6 @@ export default {
   "easytier-config-wss": "WSS 기본 URL",
   "easytier-config-room": "룸 ID",
   "easytier-config-token": "연결 토큰",
-  "easytier-config-notes": "메모",
   "easytier-config-name-ph": "예: 홈 노드",
   "easytier-config-wss-ph": "wss://your-domain/ws",
   "easytier-config-room-ph": "default",

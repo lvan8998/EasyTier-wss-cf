@@ -20,7 +20,6 @@ export default {
   "th-actions": "Actions",
   "btn-close": "Close",
   "th-peer-id": "Peer ID",
-  "th-virtual-ip": "Virtual IP",
   "th-hostname": "Hostname",
   "th-version": "Version",
   "th-rx-tx": "Rx / Tx Traffic",
