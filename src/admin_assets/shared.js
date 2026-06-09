@@ -92,8 +92,6 @@ export const sharedScript = String.raw`
   };
 
   api.buildClientWsUrl = function buildClientWsUrl(roomId, clientToken) {
-    const room = String(roomId || '').trim() || 'default';
-    const token = String(clientToken || '').trim();
     const wsPath = api.getWsPath().replace(/^\/+/, '').replace(/\/+$/, '') || 'ws';
     const url = new URL(location.origin);
     url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -101,8 +99,6 @@ export const sharedScript = String.raw`
     url.search = '';
     url.hash = '';
     url.port = '0';
-    url.searchParams.set('room', room);
-    if (token) url.searchParams.set('token', token);
     return url.toString();
   };
 

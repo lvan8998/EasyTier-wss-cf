@@ -5,7 +5,7 @@ import { loadProtos } from './core/protos.js';
 import { handleHandshake, handlePing, handleForwarding } from './core/basic_handlers.js';
 import { handleRpcReq, handleRpcResp } from './core/rpc_handler.js';
 import { getPeerManager } from './core/peer_manager.js';
-import { randomU64String } from './core/crypto.js';
+import { randomU64String, generateDigestFromStr } from './core/crypto.js';
 import { persistWebSocketAttachment } from './core/ws_attachment.js';
 import {
   buildEasyTierWsUrl,
@@ -51,8 +51,77 @@ export class RelayRoom {
 
     // 2. Internal DO-to-DO API helpers
     if (url.pathname === '/api/internal/peer-count') {
+      // Count websockets that have completed handshake (have a peerId)
       const count = this.state.getWebSockets().filter(ws => ws.peerId).length;
       return new Response(JSON.stringify({ count }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Return active network groups and their peer counts (used by admin API)
+    if (url.pathname === '/api/internal/rooms') {
+      const pm = this.peerManager;
+      const rooms = [];
+      for (const [groupKey, peersMap] of pm.peersByGroup.entries()) {
+        // groupKey format: "networkName:digestHex"
+        const colonIdx = groupKey.indexOf(':');
+        const networkName = colonIdx >= 0 ? groupKey.slice(0, colonIdx) : groupKey;
+        const count = peersMap ? peersMap.size : 0;
+        rooms.push({ roomId: networkName, peerCount: count });
+      }
+      return new Response(JSON.stringify({ rooms }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Return peers for a specific network name (used by admin stats API)
+    const internalStatsMatch = url.pathname.match(/^\/api\/internal\/rooms\/([^/]+)\/stats$/);
+    if (internalStatsMatch && request.method === 'GET') {
+      const networkName = decodeURIComponent(internalStatsMatch[1]);
+      const pm = this.peerManager;
+      const peers = [];
+      for (const [groupKey, peersMap] of pm.peersByGroup.entries()) {
+        const colonIdx = groupKey.indexOf(':');
+        const gkName = colonIdx >= 0 ? groupKey.slice(0, colonIdx) : groupKey;
+        if (gkName !== networkName) continue;
+        for (const [peerId, ws] of peersMap.entries()) {
+          const peerInfo = pm._getPeerInfosMap(groupKey)?.get(peerId);
+          const ipv4Addr = peerInfo && peerInfo.ipv4Addr && typeof peerInfo.ipv4Addr.addr === 'number'
+            ? u32ToIp(peerInfo.ipv4Addr.addr)
+            : null;
+          peers.push({
+            peerId: ws.peerId || 'Unknown',
+            ipv4Addr: ipv4Addr || 'Pending',
+            hostname: ws.domainName || (peerInfo && peerInfo.hostname) || 'N/A',
+            easytierVersion: (peerInfo && peerInfo.easytierVersion) || 'cf-ws-relay',
+            rxBytes: ws.rxBytes || 0,
+            txBytes: ws.txBytes || 0,
+            connectedAt: ws.connectedAt || Date.now()
+          });
+        }
+      }
+      return new Response(JSON.stringify({ roomId: networkName, peers }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Kick a peer in a specific network (used by admin kick API)
+    const internalKickMatch = url.pathname.match(/^\/api\/internal\/rooms\/([^/]+)\/kick$/);
+    if (internalKickMatch && request.method === 'POST') {
+      const networkName = decodeURIComponent(internalKickMatch[1]);
+      const peerId = url.searchParams.get('peerId');
+      if (!peerId) {
+        return new Response('peerId required', { status: 400 });
+      }
+      const pm = this.peerManager;
+      for (const [groupKey, peersMap] of pm.peersByGroup.entries()) {
+        const colonIdx = groupKey.indexOf(':');
+        const gkName = colonIdx >= 0 ? groupKey.slice(0, colonIdx) : groupKey;
+        if (gkName !== networkName) continue;
+        const targetWs = peersMap.get(peerId);
+        if (targetWs) {
+          targetWs.close(1000, 'Kicked by administrator');
+          return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+      }
+      return new Response(JSON.stringify({ error: 'Peer not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
     }
 
     if (url.pathname === '/api/internal/verify-token') {
@@ -70,58 +139,41 @@ export class RelayRoom {
       return new Response('Unauthorized', { status: 401 });
     }
 
-    // 3. Stats & Kick operations for individual room DOs
-    const statsMatch = url.pathname.match(/^\/api\/rooms\/([^/]+)\/stats$/);
-    if (statsMatch && request.method === 'GET') {
-      const roomId = decodeURIComponent(statsMatch[1]);
-      const isDirectory = this.state.id.toString() === this.env.RELAY_ROOM.idFromName('__directory__').toString();
-      if (!isDirectory) {
-        const websockets = this.state.getWebSockets();
-        const peers = websockets.map(ws => {
-          const peerInfo = this.peerManager._getPeerInfosMap(ws.groupKey || '')?.get(ws.peerId);
-          const ipv4Addr = peerInfo && peerInfo.ipv4Addr && typeof peerInfo.ipv4Addr.addr === 'number'
-            ? u32ToIp(peerInfo.ipv4Addr.addr)
-            : null;
-          return {
-            peerId: ws.peerId || 'Unknown',
-            ipv4Addr: ipv4Addr || 'Pending',
-            hostname: ws.domainName || (peerInfo && peerInfo.hostname) || 'N/A',
-            easytierVersion: (peerInfo && peerInfo.easytierVersion) || 'cf-ws-relay',
-            rxBytes: ws.rxBytes || 0,
-            txBytes: ws.txBytes || 0,
-            connectedAt: ws.connectedAt || Date.now()
-          };
-        });
-        return new Response(JSON.stringify({ roomId, peers }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
+    // Verify EasyTier network handshake: checks networkName + digest against configured easyTierConfigs.
+    // If no configs are configured, defaults to public relay mode (allow all).
+    if (url.pathname === '/api/internal/verify-network') {
+      const networkName = url.searchParams.get('name') || '';
+      const digestHex = url.searchParams.get('digest') || '';
+      const config = (await this.state.storage.get('config')) ?? {};
+      const configs = Array.isArray(config.easyTierConfigs) ? config.easyTierConfigs : [];
+      // Public relay mode: no configured networks, allow all
+      if (configs.length === 0) {
+        return new Response('OK', { status: 200 });
       }
+      // Find the configured network with matching name
+      const matched = configs.find(c => c.network_name === networkName);
+      if (!matched) {
+        // Network name not in admin configuration — reject
+        return new Response('Network not configured', { status: 403 });
+      }
+      // Compute expected digest using EasyTier's algorithm
+      const expectedDigest = generateDigestFromStr(networkName, matched.network_secret || '').toString('hex');
+      if (expectedDigest === digestHex) {
+        return new Response('OK', { status: 200 });
+      }
+      return new Response('Digest mismatch', { status: 401 });
     }
 
-    const kickMatch = url.pathname.match(/^\/api\/rooms\/([^/]+)\/kick$/);
-    if (kickMatch && request.method === 'POST') {
-      const roomId = decodeURIComponent(kickMatch[1]);
-      const isDirectory = this.state.id.toString() === this.env.RELAY_ROOM.idFromName('__directory__').toString();
-      if (!isDirectory) {
-        const peerId = url.searchParams.get('peerId');
-        if (!peerId) {
-          return new Response('peerId required', { status: 400 });
-        }
-        const websockets = this.state.getWebSockets();
-        const targetWs = websockets.find(ws => ws.peerId === peerId);
-        if (targetWs) {
-          targetWs.close(1000, 'Kicked by administrator');
-          return new Response(JSON.stringify({ ok: true }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        return new Response(JSON.stringify({ error: 'Peer not found' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+    // Internal stats (connections + bytes) for this DO instance
+    if (url.pathname === '/api/internal/stats') {
+      const [connections, bytesIn] = await Promise.all([
+        this.state.storage.get('connections').catch(() => 0),
+        this.state.storage.get('bytesIn').catch(() => 0),
+      ]);
+      return new Response(JSON.stringify({ connections: connections ?? 0, bytesIn: bytesIn ?? 0 }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // 4. Admin API endpoints (when handled by directory DO)
@@ -143,9 +195,11 @@ export class RelayRoom {
     if (roomId !== '__directory__') {
       const clientToken = url.searchParams.get('token') || url.searchParams.get('client_token') || '';
       const dirStub = this.env.RELAY_ROOM.get(this.env.RELAY_ROOM.idFromName('__directory__'));
-      const verifyRes = await dirStub.fetch(new Request(`http://localhost/api/internal/verify-token?token=${encodeURIComponent(clientToken)}`));
-      if (!verifyRes.ok) {
-        return new Response('Unauthorized: connection token required or invalid', { status: 401 });
+      if (clientToken) {
+        const verifyRes = await dirStub.fetch(new Request(`http://localhost/api/internal/verify-token?token=${encodeURIComponent(clientToken)}`));
+        if (!verifyRes.ok) {
+          return new Response('Unauthorized: connection token required or invalid', { status: 401 });
+        }
       }
 
       // Register room in directory
@@ -200,7 +254,7 @@ export class RelayRoom {
       switch (header.packetType) {
         case PacketType.HandShake:
           console.log(`[ws] -> handleHandshake payload hex=${payload.toString('hex')}`);
-          handleHandshake(ws, header, payload, this.types);
+          await handleHandshake(ws, header, payload, this.types, this.env);
           break;
         case PacketType.Ping:
           handlePing(ws, header, payload);
@@ -385,41 +439,42 @@ export class RelayRoom {
     const saveConfig = async (config) => await storage.put('config', config);
     const getDir = async () => (await storage.get('directory')) ?? {};
 
-    // 1. GET /api/rooms -> return active rooms with peerCount
+    // 1. GET /api/rooms -> return active networks from the `default` DO (all EasyTier peers)
     if (path === '/api/rooms' && method === 'GET') {
-      const dir = await getDir();
-      const roomIds = Object.keys(dir);
-      const rooms = await Promise.all(roomIds.map(async (roomId) => {
-        try {
-          const roomStub = this.env.RELAY_ROOM.get(this.env.RELAY_ROOM.idFromName(roomId));
-          const res = await roomStub.fetch(new Request('http://localhost/api/internal/peer-count'));
-          if (res.ok) {
-            const { count } = await res.json();
-            return { roomId, peerCount: count };
-          }
-        } catch (_) {}
-        return { roomId, peerCount: 0 };
-      }));
-      return new Response(JSON.stringify({ rooms }), {
+      try {
+        const defaultStub = this.env.RELAY_ROOM.get(this.env.RELAY_ROOM.idFromName('default'));
+        const res = await defaultStub.fetch(new Request('http://localhost/api/internal/rooms'));
+        if (res.ok) {
+          return res;
+        }
+      } catch (_) {}
+      return new Response(JSON.stringify({ rooms: [] }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // 2. GET /api/rooms/:roomId/stats -> get peers for a room (forward to room DO)
+    // 2. GET /api/rooms/:networkName/stats -> get peers in network from `default` DO
     const statsMatch = path.match(/^\/api\/rooms\/([^/]+)\/stats$/);
     if (statsMatch && method === 'GET') {
-      const roomId = decodeURIComponent(statsMatch[1]);
-      const roomStub = this.env.RELAY_ROOM.get(this.env.RELAY_ROOM.idFromName(roomId));
-      return roomStub.fetch(request);
+      const networkName = decodeURIComponent(statsMatch[1]);
+      const defaultStub = this.env.RELAY_ROOM.get(this.env.RELAY_ROOM.idFromName('default'));
+      return defaultStub.fetch(
+        new Request(`http://localhost/api/internal/rooms/${encodeURIComponent(networkName)}/stats`)
+      );
     }
 
-    // 3. POST /api/rooms/:roomId/kick -> kick a peer (forward to room DO)
+    // 3. POST /api/rooms/:networkName/kick -> kick a peer in network via `default` DO
     const kickMatch = path.match(/^\/api\/rooms\/([^/]+)\/kick$/);
     if (kickMatch && method === 'POST') {
-      const roomId = decodeURIComponent(kickMatch[1]);
-      const roomStub = this.env.RELAY_ROOM.get(this.env.RELAY_ROOM.idFromName(roomId));
-      return roomStub.fetch(request);
+      const networkName = decodeURIComponent(kickMatch[1]);
+      const peerId = url.searchParams.get('peerId');
+      const defaultStub = this.env.RELAY_ROOM.get(this.env.RELAY_ROOM.idFromName('default'));
+      return defaultStub.fetch(
+        new Request(`http://localhost/api/internal/rooms/${encodeURIComponent(networkName)}/kick?peerId=${encodeURIComponent(peerId || '')}`, {
+          method: 'POST'
+        })
+      );
     }
 
     // 4. GET /api/tokens -> return client tokens
